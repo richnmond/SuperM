@@ -1,0 +1,248 @@
+[{
+  "_id": {
+    "$oid": "6994e30787aa3fd83402dfb1"
+  },
+  "name": "Apple",
+  "description": "Fresh Apple ",
+  "price": 4500,
+  "quantity": 17,
+  "category": "Groceries",
+  "image": "/uploads/1771365127377-987572325.png",
+  "lowStockThreshold": 5,
+  "createdAt": {
+    "$date": "2026-02-17T21:52:07.394Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:03:11.029Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6995d5d969c0c554eeed6056"
+  },
+  "name": "Milk",
+  "description": "pure cow mike",
+  "price": 1000,
+  "quantity": 20,
+  "category": "Produce",
+  "image": "/uploads/1771427289036-964063467.png",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-18T15:08:09.070Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:03:01.060Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6996deca21e569a4671dfd79"
+  },
+  "name": "Shawama",
+  "description": "Nice taste shawama with bakes",
+  "price": 3500,
+  "quantity": 2,
+  "category": "Snacks",
+  "image": "/uploads/1771495134580-706437406.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-19T09:58:34.315Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:02:54.454Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6996df2f21e569a4671dfd83"
+  },
+  "name": "Fried Chicken",
+  "description": "Fried Chicken Leg Piece",
+  "price": 3000,
+  "quantity": 12,
+  "category": "Snacks",
+  "image": "/uploads/1771495215017-647894031.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-19T10:00:15.027Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:02:35.419Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6996df7721e569a4671dfd88"
+  },
+  "name": "hotdog sandwish",
+  "description": "nice made hotdog sandwish ",
+  "price": 1700,
+  "quantity": 15,
+  "category": "Snacks",
+  "image": "/uploads/1771495287556-325625927.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-19T10:01:27.585Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:02:15.302Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6996dfa721e569a4671dfd8d"
+  },
+  "name": "French Fries",
+  "description": "nice made French fries",
+  "price": 2000,
+  "quantity": 9,
+  "category": "Groceries",
+  "image": "/uploads/1771495335404-164762957.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-19T10:02:15.412Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:02:05.846Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6996e05321e569a4671dfd9c"
+  },
+  "name": "Burger",
+  "description": "snacks\r\n",
+  "price": 1500,
+  "quantity": 9,
+  "category": "Snacks",
+  "image": "/uploads/1771495507076-427295456.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-19T10:05:07.107Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-19T11:01:55.534Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6998aa467bd5b732bea0634d"
+  },
+  "name": "Chease Milk",
+  "description": "get your pure  milk",
+  "price": 2000,
+  "quantity": 21,
+  "category": "Dairy",
+  "image": "/uploads/1771612742723-294594435.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-20T18:39:02.745Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-20T18:39:02.758Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6998aa767bd5b732bea06354"
+  },
+  "name": "Mongo Guice",
+  "description": "Nice made mango juice",
+  "price": 2500,
+  "quantity": 12,
+  "category": "Dairy",
+  "image": "/uploads/1771612790374-420739711.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-20T18:39:50.386Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-20T18:39:50.392Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6998aad47bd5b732bea06359"
+  },
+  "name": "grape",
+  "description": "natural grape ",
+  "price": 1000,
+  "quantity": 9,
+  "category": "Groceries",
+  "image": "/uploads/1771612884518-404089246.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-20T18:41:24.533Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-20T18:41:24.536Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6998abcb7bd5b732bea06394"
+  },
+  "name": "Berry",
+  "description": "Tasty Berry ",
+  "price": 2500,
+  "quantity": 12,
+  "category": "Dairy",
+  "image": "/uploads/1771613131810-865644433.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-20T18:45:31.832Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-20T18:45:31.834Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6998ac007bd5b732bea06399"
+  },
+  "name": "Chease Bread",
+  "description": "nice baked chease bread ",
+  "price": 5000,
+  "quantity": 16,
+  "category": "Groceries",
+  "image": "/uploads/1771613184820-269148230.jpg",
+  "lowStockThreshold": 10,
+  "createdAt": {
+    "$date": "2026-02-20T18:46:24.824Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-20T18:46:24.832Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69a168266133d095072b58d1"
+  },
+  "name": "Meat",
+  "barcode": "7812832849215",
+  "description": "soft meat",
+  "price": 2000,
+  "quantity": 1,
+  "category": "Meat",
+  "image": "/uploads/1772185638432-492361257.jpg",
+  "lowStockThreshold": 12,
+  "createdAt": {
+    "$date": "2026-02-27T09:47:18.457Z"
+  },
+  "updatedAt": {
+    "$date": "2026-02-27T09:47:18.473Z"
+  },
+  "__v": 0
+}]

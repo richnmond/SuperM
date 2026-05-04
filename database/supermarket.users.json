@@ -1,0 +1,65 @@
+[{
+  "_id": {
+    "$oid": "699344ba017f1b915cf3bb1c"
+  },
+  "username": "tester1771259065",
+  "email": "tester1771259065@example.com",
+  "password": "$2a$10$3Bgwlm43gkHF2hsXDv8p1u0aduFJfjgm9KlIQT4f6EqBQnPAQJNKa",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-02-16T16:24:26.236Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "699344dfead02b764683d9c4"
+  },
+  "username": "tester1771259103",
+  "email": "tester1771259103@example.com",
+  "password": "$2a$10$DEBmeXmIJ3wxbZEvvTPnOedzXLejN8tvSQxrt5ukpm5EvwLBqj0QO",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-02-16T16:25:03.492Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "699345085d51436e855cc2a2"
+  },
+  "username": "tester1771259144",
+  "email": "tester1771259144@example.com",
+  "password": "$2a$10$gLJ7dYr56dCSHVw.eISI4..8347D..o7LGJ3rJRSjobY4kfKAGu66",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-02-16T16:25:44.846Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "username": "richness",
+  "email": "princegodswill678@gmail.com",
+  "password": "$2a$10$TnHdvXOs99sjEsvUB8W3gO6NSZ.IlBG2b1esr76tcr42AAd5I7NUe",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-02-17T21:45:48.094Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6994e35387aa3fd83402dfc4"
+  },
+  "username": "Prosper",
+  "email": "prosper@gmail.com",
+  "password": "$2a$10$xtiU5u4zWZxWq4oVWK2/rOLM9jy.WUcCX3iwI3P.RT8zk3u0YVoTu",
+  "role": "admin",
+  "createdAt": {
+    "$date": "2026-02-17T21:53:23.577Z"
+  },
+  "__v": 0
+}]

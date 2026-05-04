@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f3f4f6;
+  color: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html.dark body {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+html.dark .bg-white,
+html.dark .bg-gray-50 {
+  background-color: #0b162b !important;
+}
+
+html.dark .text-gray-900 {
+  color: #e2e8f0 !important;
+}
+
+html.dark .text-gray-700 {
+  color: #cbd5e1 !important;
+}
+
+html.dark .text-gray-500 {
+  color: #94a3b8 !important;
+}
+
+html.dark .border-gray-200 {
+  border-color: #1f2937 !important;
+}
+
+html.dark .border-gray-300 {
+  border-color: #374151 !important;
+}
+
+html.dark input,
+html.dark select,
+html.dark textarea {
+  background-color: #111827;
+  color: #e5e7eb;
+}
+
+@media print {
+  body.receipt-printing * {
+    visibility: hidden !important;
+  }
+
+  body.receipt-printing #receipt-print-root,
+  body.receipt-printing #receipt-print-root * {
+    visibility: visible !important;
+  }
+
+  body.receipt-printing #receipt-print-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  body.receipt-printing .no-print {
+    display: none !important;
+  }
+}
