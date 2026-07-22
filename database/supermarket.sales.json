@@ -1,0 +1,276 @@
+[{
+  "_id": {
+    "$oid": "699345095d51436e855cc2ab"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "699345095d51436e855cc2a5"
+      },
+      "productName": "Test Product 1771259144",
+      "quantity": 1,
+      "price": 12.5,
+      "subtotal": 12.5,
+      "_id": {
+        "$oid": "699345095d51436e855cc2ac"
+      }
+    }
+  ],
+  "totalAmount": 12.5,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "699345085d51436e855cc2a2"
+  },
+  "createdAt": {
+    "$date": "2026-02-16T16:25:45.683Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6994e1bd87aa3fd83402df10"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "699345095d51436e855cc2a5"
+      },
+      "productName": "Test Product 1771259144",
+      "quantity": 1,
+      "price": 12.5,
+      "subtotal": 12.5,
+      "_id": {
+        "$oid": "6994e1bd87aa3fd83402df11"
+      }
+    }
+  ],
+  "totalAmount": 12.5,
+  "paymentMethod": "mobile",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-02-17T21:46:37.725Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6995d67769c0c554eeed60a1"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "699345095d51436e855cc2a5"
+      },
+      "productName": "Test Product 1771259144",
+      "quantity": 1,
+      "price": 12.5,
+      "subtotal": 12.5,
+      "_id": {
+        "$oid": "6995d67769c0c554eeed60a2"
+      }
+    },
+    {
+      "productId": {
+        "$oid": "6994e30787aa3fd83402dfb1"
+      },
+      "productName": "Apple",
+      "quantity": 2,
+      "price": 20,
+      "subtotal": 40,
+      "_id": {
+        "$oid": "6995d67769c0c554eeed60a3"
+      }
+    },
+    {
+      "productId": {
+        "$oid": "6995d5d969c0c554eeed6056"
+      },
+      "productName": "Milk",
+      "quantity": 1,
+      "price": 100,
+      "subtotal": 100,
+      "_id": {
+        "$oid": "6995d67769c0c554eeed60a4"
+      }
+    }
+  ],
+  "totalAmount": 152.5,
+  "paymentMethod": "mobile",
+  "cashier": {
+    "$oid": "6994e35387aa3fd83402dfc4"
+  },
+  "createdAt": {
+    "$date": "2026-02-18T15:10:47.992Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6997447450f337c56df68007"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6996e05321e569a4671dfd9c"
+      },
+      "productName": "Burger",
+      "quantity": 1,
+      "price": 1500,
+      "subtotal": 1500,
+      "_id": {
+        "$oid": "6997447450f337c56df68008"
+      }
+    }
+  ],
+  "totalAmount": 1500,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-02-19T17:12:20.265Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6997447c50f337c56df6800f"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6996dfa721e569a4671dfd8d"
+      },
+      "productName": "French Fries",
+      "quantity": 1,
+      "price": 2000,
+      "subtotal": 2000,
+      "_id": {
+        "$oid": "6997447c50f337c56df68010"
+      }
+    }
+  ],
+  "totalAmount": 2000,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-02-19T17:12:28.953Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "699dafaee778236183303e83"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6995d5d969c0c554eeed6056"
+      },
+      "productName": "Milk",
+      "quantity": 1,
+      "price": 1000,
+      "subtotal": 1000,
+      "_id": {
+        "$oid": "699dafaee778236183303e84"
+      }
+    }
+  ],
+  "totalAmount": 1000,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-02-24T14:03:26.363Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69a491526133d095072b5a3a"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "69a168266133d095072b58d1"
+      },
+      "productName": "Meat",
+      "quantity": 1,
+      "price": 2000,
+      "subtotal": 2000,
+      "_id": {
+        "$oid": "69a491526133d095072b5a3b"
+      }
+    }
+  ],
+  "totalAmount": 2000,
+  "paymentMethod": "mobile",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-03-01T19:19:46.660Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b547231d78ce6ef4a9a1f2"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6998abcb7bd5b732bea06394"
+      },
+      "productName": "Berry",
+      "quantity": 1,
+      "price": 2500,
+      "subtotal": 2500,
+      "_id": {
+        "$oid": "69b547231d78ce6ef4a9a1f3"
+      }
+    }
+  ],
+  "totalAmount": 2500,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-03-14T11:31:47.769Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "69b54ee11d78ce6ef4a9a2c4"
+  },
+  "items": [
+    {
+      "productId": {
+        "$oid": "6998aad47bd5b732bea06359"
+      },
+      "productName": "grape",
+      "quantity": 1,
+      "price": 1000,
+      "subtotal": 1000,
+      "_id": {
+        "$oid": "69b54ee11d78ce6ef4a9a2c5"
+      }
+    }
+  ],
+  "totalAmount": 1000,
+  "paymentMethod": "cash",
+  "cashier": {
+    "$oid": "6994e18c87aa3fd83402def2"
+  },
+  "createdAt": {
+    "$date": "2026-03-14T12:04:49.379Z"
+  },
+  "__v": 0
+}]
