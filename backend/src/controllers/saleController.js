@@ -67,7 +67,7 @@ const createSale = async (req, res) => {
 const getSales = async (req, res) => {
   try {
     const { startDate, endDate, period } = req.query;
-    let query = {};
+    let query = { cashier: req.user._id };
 
     if (startDate && endDate) {
       query.createdAt = {
@@ -107,9 +107,10 @@ const getSales = async (req, res) => {
 
 const getSalesSummary = async (req, res) => {
   try {
-    const totalSales = await Sale.countDocuments();
+    const totalSales = await Sale.countDocuments({ cashier: req.user._id });
     
     const revenueData = await Sale.aggregate([
+      { $match: { cashier: req.user._id } },
       {
         $group: {
           _id: null,

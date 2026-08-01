@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import PrivateRoute from './components/PrivateRoute';
+import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
@@ -22,9 +23,10 @@ function App() {
         <AuthProvider>
           <Toaster position="top-right" />
           <Routes>
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
-              <Route index element={<Navigate to="/dashboard" />} />
+            <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>}>
+              <Route index element={<Navigate to="/app/dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<Products />} />
               <Route path="pos" element={<POS />} />

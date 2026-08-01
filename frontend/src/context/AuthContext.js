@@ -43,18 +43,13 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (username, email, password) => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/auth/register`, {
+      await axios.post(`${API_BASE_URL}/api/auth/register`, {
         username,
         email,
-        password
+        password,
       });
 
-      const { token, ...userData } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(userData);
-      toast.success('Account created successfully!');
+      toast.success('Account created successfully! Please sign in.');
       return true;
     } catch (error) {
       toast.error(error.response?.data?.message || 'Signup failed');
