@@ -45,7 +45,7 @@ const createSale = async (req, res) => {
     // Create sale
     const sale = await Sale.create({
       items: itemsWithCost,
-      totalAmount: Number(totalAmount || computedTotalAmount).toFixed(2),
+      totalAmount: Number((Number(totalAmount || computedTotalAmount)).toFixed(2)),
       totalCost,
       paymentMethod,
       cashier: req.user._id
