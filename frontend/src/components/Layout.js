@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -7,12 +7,15 @@ import {
   FaBoxOpen,
   FaCashRegister,
   FaShoppingBag,
+  FaUserFriends,
   FaUsers,
   FaReceipt,
   FaDollarSign,
   FaMoon,
   FaSignOutAlt,
-  FaShoppingCart
+  FaShoppingCart,
+  FaBars,
+  FaTimes
 } from 'react-icons/fa';
 
 const navClass = ({ isActive }) =>
@@ -27,6 +30,7 @@ const navItems = [
   { to: '/app/products', label: 'Products', icon: FaBoxOpen },
   { to: '/app/pos', label: 'POS', icon: FaCashRegister },
   { to: '/app/sales', label: 'Sales', icon: FaShoppingBag },
+  { to: '/app/customers', label: 'Customers', icon: FaUserFriends },
   { to: '/app/suppliers', label: 'Suppliers', icon: FaUsers },
   { to: '/app/expenses', label: 'Expenses', icon: FaReceipt },
   { to: '/app/profit', label: 'Profit', icon: FaDollarSign }
@@ -35,14 +39,43 @@ const navItems = [
 const Layout = () => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const closeMobileMenu = () => setMobileMenuOpen(false);
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <div className="lg:grid lg:grid-cols-[300px_1fr]">
-        <aside className="min-h-screen bg-gradient-to-b from-blue-700 via-blue-800 to-slate-900 text-white shadow-xl">
-          <div className="flex h-full flex-col justify-between px-6 py-8">
-            <div className="space-y-10">
-              <div className="rounded-3xl bg-white/10 p-4 shadow-inner shadow-black/10 backdrop-blur-xl">
+        <div className="lg:hidden">
+          <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-700 text-lg text-white shadow-sm">
+                <FaShoppingCart />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">SuperM</p>
+                <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Retail control</p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              className="flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 bg-slate-100 text-slate-700 transition hover:bg-slate-200 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+              aria-label="Toggle navigation"
+            >
+              {mobileMenuOpen ? <FaTimes /> : <FaBars />}
+            </button>
+          </header>
+        </div>
+
+        <aside
+          className={`fixed inset-y-0 left-0 z-40 w-[82%] max-w-[300px] transform overflow-y-auto bg-gradient-to-b from-blue-700 via-blue-800 to-slate-900 text-white shadow-xl transition-transform duration-300 ease-in-out lg:static lg:w-auto lg:max-w-none lg:translate-x-0 ${
+            mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+          } lg:translate-x-0`}
+        >
+          <div className="flex min-h-screen flex-col justify-between px-5 py-6 lg:px-6 lg:py-8">
+            <div className="space-y-8">
+              <div className="rounded-3xl bg-white/10 p-4 shadow-inner shadow-black/10 backdrop-blur-xl lg:rounded-[2rem]">
                 <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-white text-blue-800 text-2xl font-black shadow-sm">
                   <FaShoppingCart />
                 </div>
@@ -57,7 +90,12 @@ const Layout = () => {
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <NavLink key={item.to} to={item.to} className={navClass}>
+                    <NavLink
+                      key={item.to}
+                      to={item.to}
+                      onClick={closeMobileMenu}
+                      className={navClass}
+                    >
                       <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-white/10 text-lg text-white">
                         <Icon />
                       </span>
@@ -73,9 +111,9 @@ const Layout = () => {
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15 text-xl font-semibold text-white">
                   {user?.username?.[0]?.toUpperCase() || 'U'}
                 </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{user?.businessName || 'SuperM Store'}</p>
-                  <p className="text-xs text-blue-100/80">{user?.username} ({user?.role})</p>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-white">{user?.businessName || 'SuperM Store'}</p>
+                  <p className="truncate text-xs text-blue-100/80">{user?.username} ({user?.role})</p>
                 </div>
               </div>
 
@@ -99,7 +137,7 @@ const Layout = () => {
           </div>
         </aside>
 
-        <main className="px-4 py-6 sm:px-6 lg:px-8">
+        <main className="min-w-0 flex-1 px-3 py-4 sm:px-6 lg:px-8 lg:py-6">
           <Outlet />
         </main>
       </div>

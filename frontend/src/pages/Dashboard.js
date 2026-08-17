@@ -143,25 +143,24 @@ const Dashboard = () => {
         </form>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="relative bg-white pt-5 px-4 pb-12 sm:pt-6 sm:px-6 shadow rounded-lg overflow-hidden"
+            className="relative overflow-hidden rounded-lg bg-white px-4 pb-12 pt-5 shadow sm:px-6 sm:pt-6"
           >
             <dt>
-              <div className="absolute bg-primary-500 rounded-md p-3">
+              <div className="absolute rounded-md bg-primary-500 p-3">
                 <stat.icon className="h-6 w-6 text-white" aria-hidden="true" />
               </div>
-              <p className="ml-16 text-sm font-medium text-gray-500 truncate">
+              <p className="ml-16 truncate text-sm font-medium text-gray-500">
                 {stat.name}
               </p>
             </dt>
-            <dd className="ml-16 pb-6 flex items-baseline sm:pb-7">
-              <p className="text-2xl font-semibold text-gray-900">{stat.value}</p>
+            <dd className="ml-16 flex items-baseline pb-6 sm:pb-7">
+              <p className="text-xl font-semibold text-gray-900 sm:text-2xl">{stat.value}</p>
               <p
-                className={`ml-2 flex items-baseline text-sm font-semibold ${
+                className={`ml-2 flex items-baseline text-xs font-semibold sm:text-sm ${
                   stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
                 }`}
               >
@@ -172,54 +171,55 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Sales Overview</h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={salesChartData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Line
-                type="monotone"
-                dataKey="amount"
-                stroke="#2563eb"
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
+          <h2 className="mb-4 text-lg font-medium text-gray-900">Sales Overview</h2>
+          <div className="h-[240px] w-full sm:h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={salesChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+                <YAxis tick={{ fontSize: 12 }} />
+                <Tooltip />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="amount"
+                  stroke="#2563eb"
+                  strokeWidth={2}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow">
-          <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Sales</h2>
-          <div className="overflow-hidden">
+        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
+          <h2 className="mb-4 text-lg font-medium text-gray-900">Recent Sales</h2>
+          <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
                     Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
                     Items
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
                     Total
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="divide-y divide-gray-200 bg-white">
                 {recentSales.map((sale) => (
                   <tr key={sale._id}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-900 sm:px-6 sm:text-sm">
                       {new Date(sale.createdAt).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-500 sm:px-6 sm:text-sm">
                       {sale.items.length} items
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-900 sm:px-6 sm:text-sm">
                       ₦{sale.totalAmount.toFixed(2)}
                     </td>
                   </tr>

@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Products from './pages/Products';
 import POS from './pages/POS'; 
 import SalesHistory from './pages/SalesHistory';
+import Customers from './pages/Customers';
 import Suppliers from './pages/Suppliers';
 import Expenses from './pages/Expenses';
 import Profit from './pages/Profit';
@@ -31,6 +32,7 @@ function App() {
               <Route path="products" element={<Products />} />
               <Route path="pos" element={<POS />} />
               <Route path="sales" element={<SalesHistory />} />
+              <Route path="customers" element={<Customers />} />
               <Route path="suppliers" element={<Suppliers />} />
               <Route path="expenses" element={<Expenses />} />
               <Route path="profit" element={<Profit />} />
