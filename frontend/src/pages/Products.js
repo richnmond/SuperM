@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { EyeIcon, PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -53,7 +54,7 @@ const Products = () => {
       if (searchTerm) params.append('search', searchTerm);
       if (categoryFilter) params.append('category', categoryFilter);
 
-      const response = await axios.get(`http://localhost:5000/api/products?${params}`);
+      const response = await axios.get(`${API_BASE_URL}/api/products?${params}`);
       setProducts(response.data);
     } catch (error) {
       toast.error('Failed to fetch products');
@@ -75,7 +76,7 @@ const Products = () => {
 
   const generateBarcode = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/barcode/generate');
+      const response = await axios.get(`${API_BASE_URL}/api/barcode/generate`);
       setFormData((prev) => ({
         ...prev,
         barcode: response.data.barcode
@@ -106,10 +107,10 @@ const Products = () => {
 
     try {
       if (editingProduct) {
-        await axios.put(`http://localhost:5000/api/products/${editingProduct._id}`, formDataToSend);
+        await axios.put(`${API_BASE_URL}/api/products/${editingProduct._id}`, formDataToSend);
         toast.success('Product updated successfully');
       } else {
-        await axios.post('http://localhost:5000/api/products', formDataToSend);
+        await axios.post(`${API_BASE_URL}/api/products`, formDataToSend);
         toast.success('Product created successfully');
       }
       
@@ -141,7 +142,7 @@ const Products = () => {
   const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this product?')) {
       try {
-        await axios.delete(`http://localhost:5000/api/products/${id}`);
+        await axios.delete(`${API_BASE_URL}/api/products/${id}`);
         toast.success('Product deleted successfully');
         fetchProducts();
       } catch (error) {
@@ -274,7 +275,7 @@ const Products = () => {
                   <div className="flex items-center">
                     {product.image && (
                       <img
-                        src={`http://localhost:5000${product.image}`}
+                        src={`${API_BASE_URL}${product.image}`}
                         alt={product.name}
                         className="h-10 w-10 rounded-full object-cover"
                       />
@@ -375,7 +376,7 @@ const Products = () => {
                 <div className="mt-4 space-y-4">
                   {selectedProduct.image ? (
                     <img
-                      src={`http://localhost:5000${selectedProduct.image}`}
+                      src={`${API_BASE_URL}${selectedProduct.image}`}
                       alt={selectedProduct.name}
                       className="h-48 w-full rounded-lg object-cover"
                     />

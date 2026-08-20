@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -244,7 +245,7 @@ const Profit = () => {
       const params = new URLSearchParams();
       params.append('startDate', new Date(startDate).toISOString());
       params.append('endDate', new Date(endDate).toISOString());
-      const { data } = await axios.get(`http://localhost:5000/api/profit/summary?${params.toString()}`);
+      const { data } = await axios.get(`${API_BASE_URL}/api/profit/summary?${params.toString()}`);
       setSummary(data);
       setProfitTrend(data.profitTrend || []);
       setExpenseCategories(data.topExpenseCategories || []);

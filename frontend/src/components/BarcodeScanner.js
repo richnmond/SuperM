@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { QrCodeIcon, XMarkIcon, CameraIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 
 const BarcodeScanner = ({ onProductFound, onClose }) => {
   const [barcode, setBarcode] = useState('');
@@ -51,7 +52,7 @@ const BarcodeScanner = ({ onProductFound, onClose }) => {
 
   const lookupBarcode = async (code) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/barcode/lookup/${code}`);
+      const response = await axios.get(`${API_BASE_URL}/api/barcode/lookup/${code}`);
       onProductFound(response.data);
       setBarcode('');
       scanBufferRef.current = '';

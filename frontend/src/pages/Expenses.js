@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { PlusIcon, PencilIcon, TrashIcon, BanknotesIcon } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '../config';
 
 const defaultExpense = {
   title: '',
@@ -27,7 +28,7 @@ const Expenses = () => {
 
   const fetchExpenses = async () => {
     try {
-      const { data } = await axios.get('http://localhost:5000/api/expenses');
+      const { data } = await axios.get(`${API_BASE_URL}/api/expenses`);
       setExpenses(data);
     } catch (error) {
       toast.error('Failed to load expenses');
@@ -40,10 +41,10 @@ const Expenses = () => {
     e.preventDefault();
     try {
       if (editing) {
-        await axios.put(`http://localhost:5000/api/expenses/${editing._id}`, formData);
+        await axios.put(`${API_BASE_URL}/api/expenses/${editing._id}`, formData);
         toast.success('Expense updated');
       } else {
-        await axios.post('http://localhost:5000/api/expenses', formData);
+        await axios.post(`${API_BASE_URL}/api/expenses`, formData);
         toast.success('Expense added');
       }
       setShowModal(false);
@@ -58,7 +59,7 @@ const Expenses = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this expense?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/expenses/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/expenses/${id}`);
       toast.success('Expense removed');
       fetchExpenses();
     } catch (error) {

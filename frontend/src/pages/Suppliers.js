@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { PlusIcon, PencilIcon, TrashIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '../config';
 
 const defaultForm = {
   name: '',
@@ -30,7 +31,7 @@ const Suppliers = () => {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
-      const { data } = await axios.get(`http://localhost:5000/api/suppliers?${params}`);
+      const { data } = await axios.get(`${API_BASE_URL}/api/suppliers?${params}`);
       setSuppliers(data);
     } catch (error) {
       toast.error('Failed to load suppliers');
@@ -50,10 +51,10 @@ const Suppliers = () => {
 
     try {
       if (editing) {
-        await axios.put(`http://localhost:5000/api/suppliers/${editing._id}`, payload);
+        await axios.put(`${API_BASE_URL}/api/suppliers/${editing._id}`, payload);
         toast.success('Supplier updated');
       } else {
-        await axios.post('http://localhost:5000/api/suppliers', payload);
+        await axios.post(`${API_BASE_URL}/api/suppliers`, payload);
         toast.success('Supplier added');
       }
       setShowModal(false);
@@ -83,7 +84,7 @@ const Suppliers = () => {
   const handleDelete = async (id) => {
     if (!window.confirm('Delete this supplier?')) return;
     try {
-      await axios.delete(`http://localhost:5000/api/suppliers/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/suppliers/${id}`);
       toast.success('Supplier deleted');
       fetchSuppliers();
     } catch (error) {

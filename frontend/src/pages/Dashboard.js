@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config';
 import {
   CurrencyDollarIcon,
   ShoppingBagIcon,
@@ -47,8 +48,8 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const [summaryRes, salesRes] = await Promise.all([
-        axios.get('http://localhost:5000/api/sales/summary'),
-        axios.get('http://localhost:5000/api/sales')
+        axios.get(`${API_BASE_URL}/api/sales/summary`),
+        axios.get(`${API_BASE_URL}/api/sales`)
       ]);
 
       setSummary(summaryRes.data);

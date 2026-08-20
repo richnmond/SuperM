@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { MagnifyingGlassIcon, XMarkIcon, ShoppingCartIcon, QrCodeIcon } from '@heroicons/react/24/outline';
 import BarcodeScanner from '../components/BarcodeScanner';
 import ReceiptModal from '../components/ReceiptModal';
+import { API_BASE_URL } from '../config';
 
 const POS = () => {
   const [products, setProducts] = useState([]);
@@ -43,7 +44,7 @@ const POS = () => {
 
   const fetchProducts = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/products');
+      const response = await axios.get(`${API_BASE_URL}/api/products`);
       setProducts(response.data);
     } catch (error) {
       toast.error('Failed to fetch products');
@@ -149,7 +150,7 @@ const POS = () => {
     }
 
     try {
-      const { data: sale } = await axios.post('http://localhost:5000/api/sales', {
+      const { data: sale } = await axios.post(`${API_BASE_URL}/api/sales`, {
         items: cart,
         totalAmount: calculateTotal(),
         paymentMethod
@@ -225,7 +226,7 @@ const POS = () => {
                 >
                   {product.image && (
                     <img
-                      src={`http://localhost:5000${product.image}`}
+                      src={`${API_BASE_URL}${product.image}`}
                       alt={product.name}
                       className="w-full h-32 object-cover rounded-md mb-2"
                     />

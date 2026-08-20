@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { PlusIcon, PencilIcon, TrashIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { API_BASE_URL } from '../config';
 
 const defaultForm = {
   name: '',
@@ -27,7 +28,7 @@ const Customers = () => {
     try {
       const params = new URLSearchParams();
       if (search) params.append('search', search);
-      const { data } = await axios.get(`http://localhost:5000/api/customers?${params}`);
+      const { data } = await axios.get(`${API_BASE_URL}/api/customers?${params}`);
       setCustomers(data);
     } catch (error) {
       toast.error('Failed to load customers');
@@ -82,10 +83,10 @@ const Customers = () => {
 
     try {
       if (editing) {
-        await axios.put(`http://localhost:5000/api/customers/${editing._id}`, customerPayload);
+        await axios.put(`${API_BASE_URL}/api/customers/${editing._id}`, customerPayload);
         toast.success('Customer updated');
       } else {
-        await axios.post('http://localhost:5000/api/customers', customerPayload);
+        await axios.post(`${API_BASE_URL}/api/customers`, customerPayload);
         toast.success('Customer added');
       }
 
@@ -116,7 +117,7 @@ const Customers = () => {
     if (!window.confirm('Delete this customer?')) return;
 
     try {
-      await axios.delete(`http://localhost:5000/api/customers/${id}`);
+      await axios.delete(`${API_BASE_URL}/api/customers/${id}`);
       toast.success('Customer deleted');
       fetchCustomers();
     } catch (error) {

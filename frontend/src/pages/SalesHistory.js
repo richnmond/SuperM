@@ -3,6 +3,7 @@ import axios from 'axios';
 import { format } from 'date-fns';
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
+import { API_BASE_URL } from '../config';
 
 const SalesHistory = () => {
   const [sales, setSales] = useState([]);
@@ -26,7 +27,7 @@ const SalesHistory = () => {
         params.append('endDate', endDate);
       }
 
-      const response = await axios.get(`http://localhost:5000/api/sales?${params}`);
+      const response = await axios.get(`${API_BASE_URL}/api/sales?${params}`);
       setSales(response.data);
     } catch (error) {
       toast.error('Failed to fetch sales');
@@ -37,7 +38,7 @@ const SalesHistory = () => {
 
   const handleExport = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/sales/export/csv', {
+      const response = await axios.get(`${API_BASE_URL}/api/sales/export/csv`, {
         responseType: 'blob'
       });
 
