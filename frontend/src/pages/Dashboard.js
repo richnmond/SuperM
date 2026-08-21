@@ -1,29 +1,33 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
-import { useAuth } from '../context/AuthContext';
-import { API_BASE_URL } from '../config';
+import toast from 'react-hot-toast';
 import {
-  CurrencyDollarIcon,
-  ShoppingBagIcon,
+  ArrowPathIcon,
+  ArrowTrendingUpIcon,
+  BanknotesIcon,
+  CubeIcon,
   ExclamationTriangleIcon,
-  CubeIcon
+  PencilSquareIcon,
+  ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
 import {
-  LineChart,
+  CartesianGrid,
   Line,
-  BarChart,
-  Bar,
+  LineChart,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
 } from 'recharts';
-import toast from 'react-hot-toast';
+import { useAuth } from '../context/AuthContext';
+import { API_BASE_URL } from '../config';
+
+const currencyFormatter = new Intl.NumberFormat('en-NG', {
+  style: 'currency',
+  currency: 'NGN',
+});
+
+const compactNumber = new Intl.NumberFormat('en-NG');
 
 const Dashboard = () => {
   const { user, updateBusinessName } = useAuth();
@@ -31,7 +35,7 @@ const Dashboard = () => {
     totalSales: 0,
     totalRevenue: 0,
     totalProducts: 0,
-    lowStockProducts: 0
+    lowStockProducts: 0,
   });
   const [recentSales, setRecentSales] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -46,10 +50,11 @@ const Dashboard = () => {
   }, [user]);
 
   const fetchDashboardData = async () => {
+    setLoading(true);
     try {
       const [summaryRes, salesRes] = await Promise.all([
         axios.get(`${API_BASE_URL}/api/sales/summary`),
-        axios.get(`${API_BASE_URL}/api/sales`)
+        axios.get(`${API_BASE_URL}/api/sales`),
       ]);
 
       setSummary(summaryRes.data);
@@ -76,160 +81,256 @@ const Dashboard = () => {
     }
   };
 
+  const chartData = useMemo(
+    () =>
+      recentSales
+        .slice()
+        .reverse()
+        .map((sale) => ({
+          date: new Date(sale.createdAt).toLocaleDateString('en-NG', {
+            month: 'short',
+            day: 'numeric',
+          }),
+          amount: Number(sale.totalAmount || 0),
+        })),
+    [recentSales]
+  );
+
+  const averageSale =
+    summary.totalSales > 0 ? summary.totalRevenue / summary.totalSales : 0;
+
   const stats = [
     {
       name: 'Total Revenue',
-      value: `₦${summary.totalRevenue.toFixed(2)}`,
-      icon: CurrencyDollarIcon,
-      change: '+12.5%',
-      changeType: 'positive'
+      value: currencyFormatter.format(summary.totalRevenue || 0),
+      detail: `${currencyFormatter.format(averageSale)} average sale`,
+      icon: BanknotesIcon,
+      accent: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
     },
     {
-      name: 'Total Sales',
-      value: summary.totalSales,
+      name: 'Sales Completed',
+      value: compactNumber.format(summary.totalSales || 0),
+      detail: `${recentSales.length} shown in recent activity`,
       icon: ShoppingBagIcon,
-      change: '+8.2%',
-      changeType: 'positive'
+      accent: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
     },
     {
-      name: 'Total Products',
-      value: summary.totalProducts,
+      name: 'Products Managed',
+      value: compactNumber.format(summary.totalProducts || 0),
+      detail: 'Active catalog coverage',
       icon: CubeIcon,
-      change:'+3',
-      changeType: 'positive'
+      accent: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300',
     },
     {
-      name: 'Low Stock Alert',
-      value: summary.lowStockProducts,
+      name: 'Low Stock',
+      value: compactNumber.format(summary.lowStockProducts || 0),
+      detail: summary.lowStockProducts > 0 ? 'Needs restocking review' : 'Inventory looks healthy',
       icon: ExclamationTriangleIcon,
-      change: summary.lowStockProducts > 0 ? 'Action needed' : 'All good',
-      changeType: summary.lowStockProducts > 0 ? 'negative' : 'positive'
-    }
+      accent:
+        summary.lowStockProducts > 0
+          ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
+          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+    },
   ];
-
-  const salesChartData = recentSales.map(sale => ({
-    date: new Date(sale.createdAt).toLocaleDateString(),
-    amount: sale.totalAmount
-  }));
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-          <p className="text-sm text-gray-600">
-            {user?.businessName ? `Welcome to ${user.businessName}` : 'Add your business name to personalize receipts and reports.'}
-          </p>
-        </div>
-        <form onSubmit={handleBusinessNameSave} className="w-full max-w-md rounded-lg border border-gray-200 bg-white p-4 shadow-sm">
-          <label htmlFor="businessName" className="block text-sm font-medium text-gray-700">
-            Business Name
-          </label>
-          <div className="mt-2 flex flex-col gap-2 sm:flex-row">
-            <input
-              id="businessName"
-              type="text"
-              value={businessNameInput}
-              onChange={(e) => setBusinessNameInput(e.target.value)}
-              placeholder="Enter your business name"
-              className="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-primary-500 focus:outline-none focus:ring-primary-500"
-            />
-            <button
-              type="submit"
-              className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </div>
+      <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="grid gap-6 p-5 sm:p-6 xl:grid-cols-[1fr_420px]">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="rounded-md bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+                Live dashboard
+              </span>
+              <span className="text-sm text-slate-500 dark:text-slate-400">
+                {new Date().toLocaleDateString('en-NG', {
+                  weekday: 'long',
+                  month: 'long',
+                  day: 'numeric',
+                  year: 'numeric',
+                })}
+              </span>
+            </div>
+            <h1 className="mt-5 text-3xl font-black text-slate-950 dark:text-white sm:text-4xl">
+              {user?.businessName || 'SuperM Store'}
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
+              Monitor sales, revenue, product coverage, and restocking signals from one focused retail command center.
+            </p>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">
+              {[
+                ['Revenue', currencyFormatter.format(summary.totalRevenue || 0)],
+                ['Transactions', compactNumber.format(summary.totalSales || 0)],
+                ['Catalog items', compactNumber.format(summary.totalProducts || 0)],
+              ].map(([label, value]) => (
+                <div key={label} className="rounded-md border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+                  <p className="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">{label}</p>
+                  <p className="mt-2 text-lg font-black text-slate-950 dark:text-white">{value}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <form onSubmit={handleBusinessNameSave} className="rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-md bg-slate-950 text-white dark:bg-white dark:text-slate-950">
+                <PencilSquareIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h2 className="font-bold text-slate-950 dark:text-white">Business profile</h2>
+                <p className="text-sm text-slate-500 dark:text-slate-400">Used on receipts and reports</p>
+              </div>
+            </div>
+            <label htmlFor="businessName" className="mt-5 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+              Business name
+            </label>
+            <div className="mt-2 flex flex-col gap-2 sm:flex-row xl:flex-col">
+              <input
+                id="businessName"
+                type="text"
+                value={businessNameInput}
+                onChange={(e) => setBusinessNameInput(e.target.value)}
+                placeholder="Enter your business name"
+                className="min-h-[42px] flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+              />
+              <button
+                type="submit"
+                className="inline-flex min-h-[42px] items-center justify-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-800"
+              >
+                Save
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="relative overflow-hidden rounded-lg bg-white px-4 pb-12 pt-5 shadow sm:px-6 sm:pt-6"
+            className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
           >
-            <dt>
-              <div className="absolute rounded-md bg-primary-500 p-3">
-                <stat.icon className="h-6 w-6 text-white" aria-hidden="true" />
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">{stat.name}</p>
+                <p className="mt-3 text-2xl font-black text-slate-950 dark:text-white">{stat.value}</p>
               </div>
-              <p className="ml-16 truncate text-sm font-medium text-gray-500">
-                {stat.name}
-              </p>
-            </dt>
-            <dd className="ml-16 flex items-baseline pb-6 sm:pb-7">
-              <p className="text-xl font-semibold text-gray-900 sm:text-2xl">{stat.value}</p>
-              <p
-                className={`ml-2 flex items-baseline text-xs font-semibold sm:text-sm ${
-                  stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
-                }`}
-              >
-                {stat.change}
-              </p>
-            </dd>
+              <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-md ${stat.accent}`}>
+                <stat.icon className="h-6 w-6" />
+              </div>
+            </div>
+            <p className="mt-4 border-t border-slate-100 pt-4 text-sm text-slate-600 dark:border-slate-800 dark:text-slate-300">
+              {stat.detail}
+            </p>
           </div>
         ))}
-      </div>
+      </section>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">Sales Overview</h2>
-          <div className="h-[240px] w-full sm:h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={salesChartData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tick={{ fontSize: 12 }} />
-                <YAxis tick={{ fontSize: 12 }} />
-                <Tooltip />
-                <Legend />
-                <Line
-                  type="monotone"
-                  dataKey="amount"
-                  stroke="#2563eb"
-                  strokeWidth={2}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+      <section className="grid grid-cols-1 gap-6 xl:grid-cols-[1.08fr_0.92fr]">
+        <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-semibold uppercase text-emerald-700 dark:text-emerald-300">Sales trend</p>
+              <h2 className="mt-1 text-xl font-black text-slate-950 dark:text-white">Recent revenue movement</h2>
+            </div>
+            <button
+              type="button"
+              onClick={fetchDashboardData}
+              disabled={loading}
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+            >
+              <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
+          <div className="h-[300px] w-full">
+            {chartData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                  <XAxis dataKey="date" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} />
+                  <Tooltip
+                    formatter={(value) => [currencyFormatter.format(value), 'Revenue']}
+                    contentStyle={{
+                      borderRadius: '8px',
+                      border: '1px solid #e2e8f0',
+                      boxShadow: '0 12px 28px rgba(15, 23, 42, 0.12)',
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="amount"
+                    stroke="#047857"
+                    strokeWidth={3}
+                    dot={{ r: 4, strokeWidth: 2, fill: '#ffffff' }}
+                    activeDot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="flex h-full flex-col items-center justify-center rounded-lg border border-dashed border-slate-300 bg-slate-50 text-center dark:border-slate-700 dark:bg-slate-950">
+                <ArrowTrendingUpIcon className="h-10 w-10 text-slate-400" />
+                <p className="mt-3 font-bold text-slate-950 dark:text-white">No sales data yet</p>
+                <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">Sales will appear here after checkout activity.</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="rounded-lg bg-white p-4 shadow sm:p-6">
-          <h2 className="mb-4 text-lg font-medium text-gray-900">Recent Sales</h2>
+        <div className="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <div className="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
+            <div>
+              <p className="text-sm font-semibold uppercase text-emerald-700 dark:text-emerald-300">Activity</p>
+              <h2 className="mt-1 text-xl font-black text-slate-950 dark:text-white">Recent sales</h2>
+            </div>
+            <span className="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+              {recentSales.length}
+            </span>
+          </div>
+
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-slate-200 dark:divide-slate-800">
+              <thead className="bg-slate-50 dark:bg-slate-950">
                 <tr>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
-                    Date
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
-                    Items
-                  </th>
-                  <th className="px-3 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500 sm:px-6">
-                    Total
-                  </th>
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Date</th>
+                  <th className="px-5 py-3 text-left text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Items</th>
+                  <th className="px-5 py-3 text-right text-xs font-bold uppercase text-slate-500 dark:text-slate-400">Total</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200 bg-white">
-                {recentSales.map((sale) => (
-                  <tr key={sale._id}>
-                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-900 sm:px-6 sm:text-sm">
-                      {new Date(sale.createdAt).toLocaleString()}
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-500 sm:px-6 sm:text-sm">
-                      {sale.items.length} items
-                    </td>
-                    <td className="whitespace-nowrap px-3 py-4 text-xs text-gray-900 sm:px-6 sm:text-sm">
-                      ₦{sale.totalAmount.toFixed(2)}
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                {recentSales.length > 0 ? (
+                  recentSales.map((sale) => (
+                    <tr key={sale._id} className="transition hover:bg-slate-50 dark:hover:bg-slate-800/60">
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-700 dark:text-slate-300">
+                        {new Date(sale.createdAt).toLocaleString('en-NG', {
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-500 dark:text-slate-400">
+                        {sale.items?.length || 0} items
+                      </td>
+                      <td className="whitespace-nowrap px-5 py-4 text-right text-sm font-bold text-slate-950 dark:text-white">
+                        {currencyFormatter.format(sale.totalAmount || 0)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="3" className="px-5 py-12 text-center text-sm text-slate-500 dark:text-slate-400">
+                      No recent sales found.
                     </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

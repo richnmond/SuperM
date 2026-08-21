@@ -80,6 +80,15 @@ html.dark textarea {
   color: #e5e7eb;
 }
 
+html.dark .landing-page {
+  background-color: #f7f4ee;
+  color: #020617;
+}
+
+html.dark .landing-page .bg-white {
+  background-color: #ffffff !important;
+}
+
 @media print {
   body.receipt-printing * {
     visibility: hidden !important;

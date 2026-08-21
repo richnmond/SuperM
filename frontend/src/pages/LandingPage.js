@@ -5,135 +5,178 @@ import {
   FaBoxes,
   FaChartLine,
   FaCheckCircle,
+  FaClipboardList,
+  FaReceipt,
   FaShieldAlt,
+  FaShoppingCart,
   FaStore,
   FaTabletAlt,
-  FaUsers,
 } from 'react-icons/fa';
+
+const productImages = [
+  '/landing-products/checkout.jpg',
+  '/landing-products/stock.jpg',
+  '/landing-products/margins.jpg',
+];
 
 const features = [
   {
-    title: 'Smart inventory control',
-    description: 'Track stock levels, supplier activity, and product movement from one polished dashboard.',
+    title: 'Inventory control',
+    description: 'Track product quantities, stock warnings, suppliers, and selling prices from one reliable workspace.',
     icon: FaBoxes,
   },
   {
-    title: 'Fast checkout experience',
-    description: 'Speed up sales with a friendly POS flow built for busy retail environments.',
+    title: 'Point of sale',
+    description: 'Keep checkout moving with fast product lookup, cart totals, customer records, and receipt support.',
     icon: FaTabletAlt,
   },
   {
-    title: 'Clear business insights',
-    description: 'Follow revenue, expenses, and profit trends with clean reports that stay easy to read.',
+    title: 'Profit reporting',
+    description: 'Understand revenue, expenses, margins, and profit movement with focused retail reports.',
     icon: FaChartLine,
   },
 ];
 
-const highlights = [
-  'Instant access to live sales and expense summaries',
-  'Secure authentication for your team and business operations',
-  'Modern interface that feels great on desktop and tablet',
-];
-
-const stats = [
-  { label: 'Products tracked', value: '500+' },
-  { label: 'Sales insights', value: '24/7' },
-  { label: 'Setup speed', value: 'Minutes' },
+const operatingPoints = [
+  'Live sales, inventory, and expense summaries',
+  'Secure staff access for daily store operations',
+  'Responsive screens for desktop counters and tablets',
 ];
 
 const LandingPage = () => {
   return (
-    <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(59,130,246,0.18),_transparent_35%),linear-gradient(135deg,_#020617_0%,_#0f172a_45%,_#111827_100%)] text-white">
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-6 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-lg font-black backdrop-blur">
-            SM
-          </div>
-          <div>
-            <p className="text-lg font-semibold">SuperM</p>
-            <p className="text-sm text-slate-300">Retail management made elegant</p>
-          </div>
-        </div>
+    <div className="landing-page min-h-screen bg-[#f7f4ee] text-slate-950">
+      <header className="mx-auto flex max-w-7xl items-center justify-between px-4 py-5 sm:px-6 lg:px-8">
+        <Link to="/" className="flex items-center gap-3">
+          <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-700 text-white shadow-sm">
+            <FaShoppingCart />
+          </span>
+          <span>
+            <span className="block text-lg font-bold leading-5">SuperM</span>
+            <span className="block text-sm text-slate-600">Business management</span>
+          </span>
+        </Link>
+
+        <nav className="hidden items-center gap-7 text-sm font-medium text-slate-700 md:flex">
+          <a href="#platform" className="transition hover:text-emerald-700">Platform</a>
+          <a href="#workflow" className="transition hover:text-emerald-700">Workflow</a>
+          <a href="#features" className="transition hover:text-emerald-700">Features</a>
+        </nav>
 
         <Link
           to="/login"
-          className="rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:bg-white/20"
+          className="inline-flex items-center gap-2 rounded-md bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-800"
         >
-          Open app
+          Open app <FaArrowRight className="text-xs" />
         </Link>
       </header>
 
-      <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <section className="grid items-center gap-10 rounded-[2rem] border border-white/10 bg-slate-900/60 p-8 shadow-2xl shadow-blue-950/40 backdrop-blur xl:grid-cols-[1.1fr_0.9fr] xl:p-12">
-          <div>
-            <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-400/30 bg-blue-500/10 px-3 py-1 text-sm font-medium text-blue-200">
+      <main>
+        <section className="mx-auto grid max-w-7xl items-center gap-10 px-4 pb-10 pt-6 sm:px-6 lg:grid-cols-[0.95fr_1.05fr] lg:px-8 lg:pb-14">
+          <div className="max-w-2xl">
+            <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-emerald-200 bg-white px-3 py-2 text-sm font-semibold text-emerald-800 shadow-sm">
               <FaShieldAlt />
-              Built for modern supermarkets
+              Built for busy retail teams
             </div>
-            <h1 className="max-w-2xl text-4xl font-black tracking-tight text-white sm:text-5xl lg:text-6xl">
-              Run your business with clarity, speed, and confidence.
+            <h1 className="text-4xl font-black leading-[1.03] text-slate-950 sm:text-5xl lg:text-6xl">
+              SuperM keeps your store organized from shelf to checkout.
             </h1>
-            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-300">
-              SuperM combines inventory, sales, suppliers, expenses, and profits into a refined management experience that helps your team stay ahead.
+            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-700">
+              Manage products, sales, suppliers, customers, expenses, and profit in a clean system designed for daily business operations.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 rounded-full bg-blue-600 px-5 py-3 font-semibold text-white transition hover:bg-blue-500"
+                className="inline-flex items-center gap-2 rounded-md bg-emerald-700 px-5 py-3 font-semibold text-white shadow-sm transition hover:bg-emerald-800"
               >
-                Get started <FaArrowRight />
+                Start managing <FaArrowRight />
               </Link>
               <a
                 href="#features"
-                className="rounded-full border border-white/15 bg-white/10 px-5 py-3 font-semibold text-slate-200 transition hover:bg-white/20"
+                className="inline-flex items-center rounded-md border border-slate-300 bg-white px-5 py-3 font-semibold text-slate-900 shadow-sm transition hover:border-emerald-300 hover:text-emerald-800"
               >
-                Explore features
+                View features
               </a>
             </div>
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              {stats.map((item) => (
-                <div key={item.label} className="rounded-2xl border border-white/10 bg-slate-800/70 px-4 py-3">
-                  <p className="text-2xl font-bold text-white">{item.value}</p>
-                  <p className="text-sm text-slate-400">{item.label}</p>
-                </div>
-              ))}
+            <div className="mt-9 grid max-w-xl grid-cols-3 divide-x divide-slate-200 rounded-lg border border-slate-200 bg-white shadow-sm">
+              <div className="p-4">
+                <p className="text-2xl font-black text-slate-950">500+</p>
+                <p className="mt-1 text-sm text-slate-600">Products</p>
+              </div>
+              <div className="p-4">
+                <p className="text-2xl font-black text-slate-950">24/7</p>
+                <p className="mt-1 text-sm text-slate-600">Insights</p>
+              </div>
+              <div className="p-4">
+                <p className="text-2xl font-black text-slate-950">Fast</p>
+                <p className="mt-1 text-sm text-slate-600">Checkout</p>
+              </div>
             </div>
           </div>
 
-          <div className="rounded-[1.5rem] border border-white/10 bg-gradient-to-br from-slate-800 to-slate-950 p-6 shadow-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.2em] text-slate-400">Today overview</p>
-                <h2 className="mt-1 text-2xl font-bold text-white">Store performance</h2>
-              </div>
-              <div className="rounded-full bg-emerald-500/15 p-3 text-emerald-400">
-                <FaChartLine />
-              </div>
-            </div>
-
-            <div className="mt-6 space-y-4">
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-blue-500/15 p-3 text-blue-300">
-                    <FaStore />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">Inventory ready</p>
-                    <p className="text-sm text-slate-400">Products, suppliers, and stock updates stay organized.</p>
-                  </div>
+          <div className="relative min-h-[520px] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-[0_24px_70px_rgba(15,23,42,0.16)]">
+            <div className="absolute inset-x-0 top-0 h-48 bg-emerald-800" />
+            <div className="relative grid h-full min-h-[520px] grid-rows-[auto_1fr] p-5 sm:p-6">
+              <div className="flex items-center justify-between rounded-md bg-white/95 p-4 shadow-sm">
+                <div>
+                  <p className="text-sm font-semibold text-slate-500">Today at a glance</p>
+                  <h2 className="mt-1 text-2xl font-black text-slate-950">Store performance</h2>
+                </div>
+                <div className="rounded-md bg-amber-100 p-3 text-amber-700">
+                  <FaStore />
                 </div>
               </div>
 
-              <div className="rounded-2xl border border-white/10 bg-white/10 p-4">
-                <div className="flex items-center gap-3">
-                  <div className="rounded-2xl bg-emerald-500/15 p-3 text-emerald-300">
-                    <FaUsers />
+              <div className="mt-5 grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                <div className="space-y-4">
+                  {productImages.map((src, index) => (
+                    <div key={src} className="flex items-center gap-4 rounded-md border border-slate-200 bg-white p-3 shadow-sm">
+                      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-md bg-slate-100">
+                        <img
+                          src={src}
+                          alt={`Featured product ${index + 1}`}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-slate-950">
+                          {index === 0 ? 'Ready for checkout' : index === 1 ? 'Stock organized' : 'Margins visible'}
+                        </p>
+                        <p className="mt-1 text-sm text-slate-600">
+                          {index === 0 ? 'Fast item lookup' : index === 1 ? 'Live quantity tracking' : 'Profit-aware sales'}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="rounded-md border border-slate-200 bg-slate-50 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-500">Revenue</p>
+                      <p className="mt-1 text-3xl font-black text-slate-950">₦284,500</p>
+                    </div>
+                    <span className="rounded-md bg-emerald-100 px-3 py-1 text-sm font-bold text-emerald-800">+12.5%</span>
                   </div>
-                  <div>
-                    <p className="font-semibold text-white">Team friendly</p>
-                    <p className="text-sm text-slate-400">Simple workflows help your staff move faster at checkout.</p>
+                  <div className="mt-7 flex h-40 items-end gap-3">
+                    {[42, 64, 52, 78, 68, 91, 84].map((height, index) => (
+                      <div key={index} className="flex flex-1 items-end rounded-t-md bg-emerald-100">
+                        <div
+                          className="w-full rounded-t-md bg-emerald-700"
+                          style={{ height: `${height}%` }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="mt-6 space-y-3">
+                    {operatingPoints.map((point) => (
+                      <div key={point} className="flex items-start gap-3 text-sm text-slate-700">
+                        <FaCheckCircle className="mt-1 shrink-0 text-emerald-700" />
+                        <span>{point}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -141,35 +184,63 @@ const LandingPage = () => {
           </div>
         </section>
 
-        <section id="features" className="mt-16 grid gap-6 md:grid-cols-3">
-          {features.map((feature) => {
-            const Icon = feature.icon;
-            return (
-              <div key={feature.title} className="rounded-[1.5rem] border border-white/10 bg-slate-900/70 p-6 shadow-lg shadow-slate-950/30">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-500/15 text-blue-300">
+        <section id="platform" className="border-y border-slate-200 bg-white">
+          <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:px-6 md:grid-cols-3 lg:px-8">
+            {[
+              ['Products', 'Keep every item, price, and stock level current.'],
+              ['Sales', 'Capture purchases and review transaction history.'],
+              ['Finance', 'Compare revenue, expenses, and profit clearly.'],
+            ].map(([title, body]) => (
+              <div key={title} className="border-slate-200 py-8 md:border-r md:px-8 first:md:pl-0 last:border-r-0">
+                <p className="text-lg font-bold text-slate-950">{title}</p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="workflow" className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+          <div>
+            <p className="text-sm font-bold uppercase text-emerald-800">Daily workflow</p>
+            <h2 className="mt-3 text-3xl font-black text-slate-950">A professional workspace for repeatable store operations.</h2>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-3">
+            {[
+              [FaClipboardList, 'Update inventory', 'Add products, quantities, suppliers, and reorder details.'],
+              [FaReceipt, 'Record sales', 'Process customer purchases and keep receipts searchable.'],
+              [FaChartLine, 'Review profit', 'Measure performance after expenses and cost of goods.'],
+            ].map(([Icon, title, body]) => (
+              <div key={title} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
+                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-emerald-100 text-emerald-800">
                   <Icon />
                 </div>
-                <h3 className="mt-5 text-xl font-semibold text-white">{feature.title}</h3>
-                <p className="mt-2 text-sm leading-7 text-slate-400">{feature.description}</p>
+                <h3 className="mt-5 font-bold text-slate-950">{title}</h3>
+                <p className="mt-2 text-sm leading-6 text-slate-600">{body}</p>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </section>
 
-        <section className="mt-16 rounded-[2rem] border border-white/10 bg-gradient-to-r from-blue-600/20 to-violet-600/20 p-8 lg:p-10">
-          <div className="grid gap-8 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.25em] text-blue-200">Why teams love it</p>
-              <h2 className="mt-3 text-3xl font-bold text-white">Everything your supermarket needs, presented beautifully.</h2>
+        <section id="features" className="bg-slate-950 py-16 text-white">
+          <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div className="max-w-2xl">
+              <p className="text-sm font-bold uppercase text-amber-300">Core features</p>
+              <h2 className="mt-3 text-3xl font-black">Everything important stays visible.</h2>
             </div>
 
-            <div className="space-y-3">
-              {highlights.map((item) => (
-                <div key={item} className="flex items-start gap-3 rounded-2xl border border-white/10 bg-slate-900/50 p-4">
-                  <FaCheckCircle className="mt-1 text-emerald-400" />
-                  <p className="text-slate-300">{item}</p>
-                </div>
-              ))}
+            <div className="mt-8 grid gap-5 md:grid-cols-3">
+              {features.map((feature) => {
+                const Icon = feature.icon;
+                return (
+                  <div key={feature.title} className="rounded-lg border border-white/10 bg-white/[0.06] p-6">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-md bg-white text-emerald-800">
+                      <Icon />
+                    </div>
+                    <h3 className="mt-5 text-xl font-bold">{feature.title}</h3>
+                    <p className="mt-3 text-sm leading-7 text-slate-300">{feature.description}</p>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </section>
