@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { EyeIcon, PencilIcon, TrashIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, PencilIcon, TrashIcon, PlusIcon, PrinterIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config';
+import BarcodeLabel from '../components/BarcodeLabel';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -154,6 +155,59 @@ const Products = () => {
   const handleViewDescription = (product) => {
     setSelectedProduct(product);
     setShowDescriptionModal(true);
+  };
+
+  const handlePrintLabel = (product) => {
+    if (!product?.barcode) {
+      toast.error('This product does not have a barcode yet');
+      return;
+    }
+
+    const printWindow = window.open('', '_blank', 'width=500,height=700');
+
+    if (!printWindow) {
+      toast.error('Please allow pop-ups to print the barcode label');
+      return;
+    }
+
+    printWindow.document.write(`
+      <html>
+        <head>
+          <title>Print Barcode Label</title>
+          <style>
+            body { margin: 0; display: grid; place-items: center; background: #fff; font-family: Arial, sans-serif; }
+            .label { width: 260px; border: 2px solid #111827; border-radius: 12px; padding: 18px; text-align: center; }
+            .bars { display: flex; justify-content: center; align-items: end; gap: 2px; margin: 0 auto 12px; height: 72px; }
+            .bar { display: block; background: #111827; }
+            .code { font-family: monospace; font-size: 16px; letter-spacing: 1px; margin-top: 8px; }
+            .name { font-weight: 700; font-size: 17px; margin-top: 8px; }
+            .price { font-size: 15px; margin-top: 4px; }
+          </style>
+        </head>
+        <body>
+          <div class="label">
+            <div class="bars">
+              ${product.barcode.split('').map((digit) => {
+                const isDark = Number(digit) % 2 === 0;
+                const width = `${Math.max(3, Number(digit) * 2 + 5)}px`;
+                const height = isDark ? '40px' : '60px';
+                return `<span class="bar" style="width:${width}; height:${height};"></span>`;
+              }).join('')}
+            </div>
+            <div class="code">${product.barcode}</div>
+            <div class="name">${product.name}</div>
+            <div class="price">₦${Number(product.price || 0).toFixed(2)}</div>
+          </div>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
+    setTimeout(() => {
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }, 250);
   };
 
   const resetForm = () => {
@@ -406,6 +460,28 @@ const Products = () => {
                       {selectedProduct.description || 'No description provided for this product.'}
                     </p>
                   </div>
+
+                  {selectedProduct.barcode && (
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                      <div className="flex items-center justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">Barcode</p>
+                          <p className="font-mono text-sm text-gray-700">{selectedProduct.barcode}</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => handlePrintLabel(selectedProduct)}
+                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+                        >
+                          <PrinterIcon className="mr-2 h-4 w-4" />
+                          Print Label
+                        </button>
+                      </div>
+                      <div className="mt-4 print-label-preview">
+                        <BarcodeLabel product={selectedProduct} />
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
               <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">

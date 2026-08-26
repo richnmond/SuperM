@@ -1,5 +1,18 @@
 const Product = require('../models/Product');
 
+const generateUniqueBarcode = async () => {
+  let barcode;
+  let exists = true;
+
+  while (exists) {
+    barcode = Math.floor(Math.random() * 9000000000000) + 1000000000000;
+    const existing = await Product.findOne({ barcode: barcode.toString() });
+    exists = !!existing;
+  }
+
+  return barcode.toString();
+};
+
 const normalizeBarcode = (value) => {
   if (typeof value !== 'string') return value;
   const trimmed = value.trim();
@@ -60,7 +73,7 @@ const createProduct = async (req, res) => {
     productData.taxRate = normalizeTaxRate(productData.taxRate);
     productData.barcode = normalizeBarcode(productData.barcode);
     if (productData.barcode === undefined) {
-      delete productData.barcode;
+      productData.barcode = await generateUniqueBarcode();
     }
 
     const product = await Product.create(productData);
@@ -93,15 +106,15 @@ const updateProduct = async (req, res) => {
     fieldsToSet.taxRate = normalizeTaxRate(fieldsToSet.taxRate);
     fieldsToSet.barcode = normalizeBarcode(fieldsToSet.barcode);
 
+    if (fieldsToSet.barcode === undefined) {
+      fieldsToSet.barcode = product.barcode || (await generateUniqueBarcode());
+    }
+
     if (req.file) {
       fieldsToSet.image = `/uploads/${req.file.filename}`;
     }
 
     const updateQuery = { $set: fieldsToSet };
-    if (fieldsToSet.barcode === undefined) {
-      delete updateQuery.$set.barcode;
-      updateQuery.$unset = { barcode: 1 };
-    }
 
     const updatedProduct = await Product.findByIdAndUpdate(
       req.params.id,

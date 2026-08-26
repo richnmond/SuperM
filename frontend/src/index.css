@@ -111,4 +111,9 @@ html.dark .landing-page .bg-white {
   body.receipt-printing .no-print {
     display: none !important;
   }
+
+  .print-label-preview {
+    display: block !important;
+    page-break-inside: avoid;
+  }
 }
