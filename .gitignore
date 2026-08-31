@@ -12,6 +12,7 @@ backend/build/
 # Environment files
 .env
 .env.*
+.empfiless
 frontend/.env
 frontend/.env.*
 backend/.env

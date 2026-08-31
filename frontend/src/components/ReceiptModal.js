@@ -142,6 +142,9 @@ const ReceiptModal = ({ sale, onClose }) => {
 
               <div className="mt-5 text-center text-xs text-gray-500">
                 Thank you for your purchase!
+                <br></br>Business Address: 123 Main Street, City, State 12345
+                <br></br>tel: (123) 456-7890
+                <br></br>email: info@superm.com
               </div>
             </div>
           </div>
