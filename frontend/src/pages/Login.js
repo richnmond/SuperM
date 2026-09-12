@@ -56,19 +56,19 @@ const Login = () => {
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="grid min-h-screen lg:grid-cols-[1.02fr_0.98fr]">
         <section className="relative hidden overflow-hidden bg-slate-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-14">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(37,99,235,0.34),_transparent_42%),radial-gradient(circle_at_82%_18%,_rgba(16,185,129,0.22),_transparent_30%),radial-gradient(circle_at_18%_80%,_rgba(245,158,11,0.18),_transparent_28%)]" />
+          <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(5,150,105,0.38),_transparent_42%),radial-gradient(circle_at_82%_18%,_rgba(16,185,129,0.22),_transparent_30%),radial-gradient(circle_at_18%_80%,_rgba(6,95,70,0.18),_transparent_28%)]" />
           <div className="relative z-10 flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-xl text-blue-800 shadow-sm">
+            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-xl text-primary-800 shadow-sm">
               <FaShoppingCart />
             </span>
             <div>
               <p className="text-xl font-black leading-5">SuperM</p>
-              <p className="text-sm text-blue-100/80">Retail control</p>
+              <p className="text-sm text-primary-100/80">Retail control</p>
             </div>
           </div>
 
           <div className="relative z-10 max-w-xl py-16">
-            <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-blue-100 shadow-sm backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-primary-100 shadow-sm backdrop-blur">
               <FaStore />
               Professional store management
             </div>
@@ -101,14 +101,14 @@ const Login = () => {
                 <p className="text-sm font-semibold text-slate-300">Operations snapshot</p>
                 <p className="mt-1 text-2xl font-black">Today is ready</p>
               </div>
-              <span className="flex h-11 w-11 items-center justify-center rounded-md bg-emerald-400 text-slate-950">
+              <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-400 text-slate-950">
                 <FaChartLine />
               </span>
             </div>
             <div className="space-y-3">
               {highlights.map((item) => (
                 <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
-                  <FaCheckCircle className="mt-1 shrink-0 text-emerald-300" />
+                  <FaCheckCircle className="mt-1 shrink-0 text-primary-300" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -120,7 +120,7 @@ const Login = () => {
           <div className="w-full max-w-md">
             <div className="mb-8 flex items-center justify-between lg:hidden">
               <Link to="/" className="flex items-center gap-3">
-                <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-700 text-white shadow-sm">
+                <span className="flex h-11 w-11 items-center justify-center rounded-lg bg-primary-700 text-white shadow-sm">
                   <FaShoppingCart />
                 </span>
                 <span>
@@ -132,7 +132,7 @@ const Login = () => {
 
             <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-[0_24px_70px_rgba(15,23,42,0.12)] sm:p-8">
               <div className="mb-7">
-                <p className="text-sm font-bold uppercase text-blue-700">
+                <p className="text-sm font-bold uppercase text-primary-700">
                   {isSignup ? 'Create your workspace' : 'Welcome back'}
                 </p>
                 <h2 className="mt-2 text-3xl font-black text-slate-950">
@@ -161,7 +161,7 @@ const Login = () => {
                         required={isSignup}
                         autoComplete="username"
                         placeholder="Store admin"
-                        className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                        className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
                       />
                     </div>
                   </div>
@@ -181,7 +181,7 @@ const Login = () => {
                       required
                       autoComplete="email"
                       placeholder="you@example.com"
-                      className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                      className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
                     />
                   </div>
                 </div>
@@ -201,7 +201,7 @@ const Login = () => {
                       minLength={6}
                       autoComplete={isSignup ? 'new-password' : 'current-password'}
                       placeholder="At least 6 characters"
-                      className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                      className="h-12 w-full rounded-md border border-slate-300 bg-white pl-11 pr-4 text-slate-950 outline-none transition placeholder:text-slate-400 focus:border-primary-600 focus:ring-4 focus:ring-primary-100"
                     />
                   </div>
                 </div>
@@ -209,7 +209,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-md bg-primary-700 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-primary-800 focus:outline-none focus:ring-4 focus:ring-primary-200 disabled:cursor-not-allowed disabled:bg-slate-400"
                 >
                   {submitting ? 'Please wait...' : (isSignup ? 'Create account' : 'Sign in')}
                   {!submitting && <FaArrowRight className="text-xs" />}
@@ -222,7 +222,7 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={toggleMode}
-                    className="font-bold text-blue-700 transition hover:text-blue-900 focus:outline-none focus:ring-4 focus:ring-blue-100"
+                    className="font-bold text-primary-700 transition hover:text-primary-900 focus:outline-none focus:ring-4 focus:ring-primary-100"
                   >
                     {isSignup ? 'Sign in' : 'Create an account'}
                   </button>

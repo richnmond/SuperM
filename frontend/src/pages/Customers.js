@@ -161,11 +161,11 @@ const Customers = () => {
         </div>
         <div className="rounded-xl bg-white p-4 shadow dark:bg-gray-800">
           <p className="text-sm text-gray-500">VIP Customers</p>
-          <p className="mt-2 text-3xl font-bold text-violet-600">{stats.vip}</p>
+          <p className="mt-2 text-3xl font-bold text-primary-700">{stats.vip}</p>
         </div>
         <div className="rounded-xl bg-white p-4 shadow dark:bg-gray-800">
           <p className="text-sm text-gray-500">Total Loyalty Points</p>
-          <p className="mt-2 text-3xl font-bold text-emerald-600">{formatPoints(stats.points)}</p>
+          <p className="mt-2 text-3xl font-bold text-primary-700">{formatPoints(stats.points)}</p>
         </div>
       </div>
 
@@ -214,7 +214,7 @@ const Customers = () => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span
                     className={`inline-flex rounded-full px-2 text-xs font-semibold leading-5 ${
-                      customer.vip ? 'bg-violet-100 text-violet-800' : 'bg-slate-100 text-slate-700'
+                      customer.vip ? 'bg-primary-100 text-primary-800' : 'bg-slate-100 text-slate-700'
                     }`}
                   >
                     {customer.vip ? 'VIP' : 'Standard'}

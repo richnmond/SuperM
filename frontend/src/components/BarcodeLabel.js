@@ -28,7 +28,7 @@ const BarcodeLabel = ({ product, size = 200 }) => {
       </div>
       <div className="font-mono text-sm">{product.barcode}</div>
       <div className="font-bold mt-1">{product.name}</div>
-      <div className="text-sm">${product.price.toFixed(2)}</div>
+      <div className="text-sm">₦{product.price.toFixed(2)}</div>
     </div>
   );
 };

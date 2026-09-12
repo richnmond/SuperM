@@ -51,7 +51,7 @@ const metricCard = (title, value, Icon, accent, change, helper) => {
           <Icon className="h-6 w-6 text-white" />
         </div>
       </div>
-      <div className={`mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${isPositive ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+      <div className={`mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold ${isPositive ? 'bg-primary-100 text-primary-700' : 'bg-slate-100 text-slate-700'}`}>
         {isPositive ? <ArrowTrendingUpIcon className="h-4 w-4" /> : <ArrowTrendingDownIcon className="h-4 w-4" />}
         <span>{Number(change || 0).toFixed(1)}%</span>
       </div>
@@ -64,9 +64,9 @@ const formatMoney = (val) => `₦${Number(val || 0).toLocaleString(undefined, { 
 const formatPercent = (val) => `${Number(val || 0).toFixed(1)}%`;
 
 const buildSummaryChartData = (summary) => [
-  { name: 'Revenue', value: summary.revenue.value, color: '#16a34a' },
-  { name: 'COGS', value: summary.cogs.value, color: '#f59e0b' },
-  { name: 'Net Profit', value: summary.netProfit.value, color: '#0f172a' }
+  { name: 'Revenue', value: summary.revenue.value, color: '#047857' },
+  { name: 'COGS', value: summary.cogs.value, color: '#10b981' },
+  { name: 'Net Profit', value: summary.netProfit.value, color: '#064e3b' }
 ];
 
 const formatChartDate = (isoDate) => {
@@ -329,12 +329,12 @@ const Profit = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {metricCard('Revenue', formatMoney(summary.revenue.value), BanknotesIcon, 'bg-emerald-500', summary.revenue.change, 'Sum of all completed sales')}
-        {metricCard('COGS', formatMoney(summary.cogs.value), ChartBarIcon, 'bg-amber-500', summary.cogs.change, 'Cost of goods sold')}
-        {metricCard('Gross Profit', formatMoney(summary.grossProfit.value), BanknotesIcon, 'bg-blue-500', summary.grossProfit.change, 'Revenue minus COGS')}
-        {metricCard('Operating Expenses', formatMoney(summary.expenses.value), ArrowTrendingDownIcon, 'bg-red-500', summary.expenses.change, 'Approved expenses total')}
+        {metricCard('Revenue', formatMoney(summary.revenue.value), BanknotesIcon, 'bg-primary-600', summary.revenue.change, 'Sum of all completed sales')}
+        {metricCard('COGS', formatMoney(summary.cogs.value), ChartBarIcon, 'bg-primary-500', summary.cogs.change, 'Cost of goods sold')}
+        {metricCard('Gross Profit', formatMoney(summary.grossProfit.value), BanknotesIcon, 'bg-primary-700', summary.grossProfit.change, 'Revenue minus COGS')}
+        {metricCard('Operating Expenses', formatMoney(summary.expenses.value), ArrowTrendingDownIcon, 'bg-primary-800', summary.expenses.change, 'Approved expenses total')}
         {metricCard('Net Profit', formatMoney(summary.netProfit.value), ChartBarIcon, 'bg-slate-800', summary.netProfit.change, 'Gross profit minus operating expenses')}
-        {metricCard('Profit Margin', formatPercent(summary.profitMargin.value), ChartBarIcon, 'bg-violet-500', summary.profitMargin.change, 'Net profit divided by revenue')}
+        {metricCard('Profit Margin', formatPercent(summary.profitMargin.value), ChartBarIcon, 'bg-primary-500', summary.profitMargin.change, 'Net profit divided by revenue')}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
@@ -352,7 +352,7 @@ const Profit = () => {
                 <XAxis dataKey="name" />
                 <YAxis tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => [`₦${Number(value).toLocaleString()}`, 'Amount']} />
-                <Bar dataKey="value" fill="#2563eb">
+                <Bar dataKey="value" fill="#047857">
                   {buildSummaryChartData(summary).map((entry) => (
                     <Cell key={entry.name} fill={entry.color} />
                   ))}
@@ -377,9 +377,9 @@ const Profit = () => {
                 <YAxis tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => [`₦${Number(value).toLocaleString()}`, 'Amount']} />
                 <Legend />
-                <Line type="monotone" dataKey="revenue" stroke="#16a34a" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="grossProfit" stroke="#f59e0b" strokeWidth={2} dot={false} />
-                <Line type="monotone" dataKey="netProfit" stroke="#0f172a" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="revenue" stroke="#047857" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="grossProfit" stroke="#10b981" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="netProfit" stroke="#064e3b" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -405,11 +405,11 @@ const Profit = () => {
                     cx="50%"
                     cy="50%"
                     outerRadius={90}
-                    fill="#8884d8"
+                    fill="#047857"
                     label={({ category }) => category}
                   >
                     {expenseCategories.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={[ '#6366f1', '#34d399', '#fbbf24', '#f97316', '#ef4444' ][index % 5]} />
+                      <Cell key={`cell-${index}`} fill={[ '#064e3b', '#065f46', '#047857', '#059669', '#10b981' ][index % 5]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(value) => [`₦${Number(value).toLocaleString()}`, 'Total']} />
@@ -436,8 +436,8 @@ const Profit = () => {
                 <YAxis tickFormatter={(value) => `₦${(value / 1000).toFixed(0)}k`} />
                 <Tooltip formatter={(value) => [`₦${Number(value).toLocaleString()}`, 'Amount']} />
                 <Legend />
-                <Bar dataKey="revenue" barSize={24} fill="#2563eb" />
-                <Line type="monotone" dataKey="netProfit" stroke="#ef4444" strokeWidth={2} dot={false} />
+                <Bar dataKey="revenue" barSize={24} fill="#047857" />
+                <Line type="monotone" dataKey="netProfit" stroke="#064e3b" strokeWidth={2} dot={false} />
               </ComposedChart>
             </ResponsiveContainer>
           </div>

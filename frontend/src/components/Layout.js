@@ -49,11 +49,11 @@ const Layout = () => {
         <div className="lg:hidden">
           <header className="sticky top-0 z-30 flex items-center justify-between border-b border-slate-200 bg-white/90 px-4 py-3 backdrop-blur dark:border-slate-800 dark:bg-slate-950/90">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-blue-700 text-lg text-white shadow-sm">
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-700 text-lg text-white shadow-sm">
                 <FaShoppingCart />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-blue-600 dark:text-blue-300">SuperM</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-600 dark:text-primary-300">SuperM</p>
                 <p className="text-sm font-bold text-slate-900 dark:text-slate-100">Retail control</p>
               </div>
             </div>
@@ -69,20 +69,20 @@ const Layout = () => {
         </div>
 
         <aside
-          className={`fixed inset-y-0 left-0 z-40 w-[82%] max-w-[300px] transform overflow-y-auto bg-gradient-to-b from-blue-700 via-blue-800 to-slate-900 text-white shadow-xl transition-transform duration-300 ease-in-out lg:static lg:w-auto lg:max-w-none lg:translate-x-0 ${
+          className={`fixed inset-y-0 left-0 z-40 w-[82%] max-w-[300px] transform overflow-y-auto bg-gradient-to-b from-primary-700 via-primary-800 to-slate-900 text-white shadow-xl transition-transform duration-300 ease-in-out lg:static lg:w-auto lg:max-w-none lg:translate-x-0 ${
             mobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
           } lg:translate-x-0`}
         >
           <div className="flex min-h-screen flex-col justify-between px-5 py-6 lg:px-6 lg:py-8">
             <div className="space-y-8">
               <div className="rounded-3xl bg-white/10 p-4 shadow-inner shadow-black/10 backdrop-blur-xl lg:rounded-[2rem]">
-                <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-white text-blue-800 text-2xl font-black shadow-sm">
+                <div className="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-white text-primary-800 text-2xl font-black shadow-sm">
                   <FaShoppingCart />
                 </div>
                 <div className="mt-4">
-                  <p className="text-sm uppercase tracking-[0.2em] text-blue-200/80">SuperM</p>
+                  <p className="text-sm uppercase tracking-[0.2em] text-primary-200/80">SuperM</p>
                   <h1 className="mt-2 text-2xl font-bold text-white">Retail control</h1>
-                  <p className="mt-2 text-sm text-blue-100/80">Modern inventory, POS, and sales tools for your store.</p>
+                  <p className="mt-2 text-sm text-primary-100/80">Modern inventory, POS, and sales tools for your store.</p>
                 </div>
               </div>
 
@@ -113,7 +113,7 @@ const Layout = () => {
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-sm font-semibold text-white">{user?.businessName || 'SuperM Store'}</p>
-                  <p className="truncate text-xs text-blue-100/80">{user?.username} ({user?.role})</p>
+                  <p className="truncate text-xs text-primary-100/80">{user?.username} ({user?.role})</p>
                 </div>
               </div>
 
@@ -128,7 +128,7 @@ const Layout = () => {
               <button
                 type="button"
                 onClick={logout}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white text-blue-800 px-4 py-3 text-sm font-semibold transition hover:bg-blue-50 hover:text-blue-900"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-white text-primary-800 px-4 py-3 text-sm font-semibold transition hover:bg-primary-50 hover:text-primary-900"
               >
                 <FaSignOutAlt />
                 Logout

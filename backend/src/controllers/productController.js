@@ -25,6 +25,25 @@ const normalizeTaxRate = (value) => {
   return Math.min(100, Math.max(0, numericValue));
 };
 
+const normalizeProductFields = (productData = {}) => {
+  const sellingPrice = Number(productData.sellingPrice ?? productData.price ?? 0);
+  const costPrice = Number(productData.costPrice ?? 0);
+  const stockQuantity = Number(productData.stockQuantity ?? productData.quantity ?? 0);
+  const reorderLevel = Number(productData.reorderLevel ?? productData.lowStockThreshold ?? 20);
+
+  return {
+    ...productData,
+    sellingPrice,
+    price: sellingPrice,
+    costPrice,
+    stockQuantity,
+    quantity: stockQuantity,
+    reorderLevel,
+    lowStockThreshold: reorderLevel,
+    profitPerUnit: Number((sellingPrice - costPrice).toFixed(2))
+  };
+};
+
 const getProducts = async (req, res) => {
   try {
     const { category, search, lowStock } = req.query;
@@ -39,7 +58,10 @@ const getProducts = async (req, res) => {
     }
 
     if (lowStock === 'true') {
-      query.$expr = { $lte: ['$quantity', '$lowStockThreshold'] };
+      query.$or = [
+        { $expr: { $lte: ['$stockQuantity', '$reorderLevel'] } },
+        { $expr: { $lte: ['$quantity', '$lowStockThreshold'] } }
+      ];
     }
 
     const products = await Product.find(query).sort({ createdAt: -1 });
@@ -63,10 +85,11 @@ const getProductById = async (req, res) => {
 
 const createProduct = async (req, res) => {
   try {
-    const productData = {
+    const productData = normalizeProductFields({
       ...req.body,
       image: req.file ? `/uploads/${req.file.filename}` : null
-    };
+    });
+
     if (productData.costPrice === undefined) {
       productData.costPrice = 0;
     }
@@ -93,10 +116,10 @@ const updateProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const fieldsToSet = {
+    const fieldsToSet = normalizeProductFields({
       ...req.body,
       updatedAt: Date.now()
-    };
+    });
     if (fieldsToSet.costPrice === undefined) {
       fieldsToSet.costPrice = product.costPrice;
     }

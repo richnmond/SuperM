@@ -15,12 +15,12 @@ const Products = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: '',
+    sellingPrice: '',
     costPrice: '',
     taxRate: '0',
-    quantity: '',
+    stockQuantity: '',
+    reorderLevel: '20',
     category: 'Groceries',
-    lowStockThreshold: '10',
     barcode: '',
   });
   const [image, setImage] = useState(null);
@@ -102,6 +102,15 @@ const Products = () => {
       }
       formDataToSend.append(key, formData[key]);
     });
+    if (formData.sellingPrice !== '') {
+      formDataToSend.append('price', formData.sellingPrice);
+    }
+    if (formData.stockQuantity !== '') {
+      formDataToSend.append('quantity', formData.stockQuantity);
+    }
+    if (formData.reorderLevel !== '') {
+      formDataToSend.append('lowStockThreshold', formData.reorderLevel);
+    }
     if (image) {
       formDataToSend.append('image', image);
     }
@@ -129,12 +138,12 @@ const Products = () => {
     setFormData({
       name: product.name,
       description: product.description,
-      price: product.price,
-      costPrice: product.costPrice,
+      sellingPrice: product.sellingPrice ?? product.price ?? 0,
+      costPrice: product.costPrice ?? 0,
       taxRate: product.taxRate ?? 0,
-      quantity: product.quantity,
+      stockQuantity: product.stockQuantity ?? product.quantity ?? 0,
+      reorderLevel: product.reorderLevel ?? product.lowStockThreshold ?? 20,
       category: product.category,
-      lowStockThreshold: product.lowStockThreshold,
       barcode: product.barcode || ''
     });
     setShowModal(true);
@@ -214,15 +223,21 @@ const Products = () => {
     setFormData({
       name: '',
       description: '',
-      price: '',
+      sellingPrice: '',
       costPrice: '',
       taxRate: '0',
-      quantity: '',
+      stockQuantity: '',
+      reorderLevel: '20',
       category: 'Groceries',
-      lowStockThreshold: '10',
       barcode: ''
     });
     setImage(null);
+  };
+
+  const getProductProfit = (product) => {
+    const sellingPrice = Number(product.sellingPrice ?? product.price ?? 0);
+    const costPrice = Number(product.costPrice ?? 0);
+    return Number((sellingPrice - costPrice).toFixed(2));
   };
 
   const getStockStatus = (quantity, threshold) => {
@@ -233,8 +248,8 @@ const Products = () => {
 
   const getStockStatusColor = (quantity, threshold) => {
     if (quantity === 0) return 'bg-red-100 text-red-800';
-    if (quantity <= threshold) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
+    if (quantity <= threshold) return 'bg-primary-100 text-primary-800';
+    return 'bg-primary-50 text-primary-700';
   };
 
   if (loading) {
@@ -309,10 +324,13 @@ const Products = () => {
                 Category
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Price
+                Selling Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Stock
+                Cost / Stock
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Profit / Reorder
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
@@ -352,14 +370,19 @@ const Products = () => {
                   {product.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₦{product.price.toFixed(2)}
+                  ₦{Number(product.sellingPrice ?? product.price ?? 0).toFixed(2)}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {product.quantity}
+                  <div>Cost: ₦{Number(product.costPrice ?? 0).toFixed(2)}</div>
+                  <div>Stock: {Number(product.stockQuantity ?? product.quantity ?? 0)}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <div>Profit: ₦{getProductProfit(product).toFixed(2)}</div>
+                  <div>Reorder: {Number(product.reorderLevel ?? product.lowStockThreshold ?? 0)}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStockStatusColor(product.quantity, product.lowStockThreshold)}`}>
-                    {getStockStatus(product.quantity, product.lowStockThreshold)}
+                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStockStatusColor(Number(product.stockQuantity ?? product.quantity ?? 0), Number(product.reorderLevel ?? product.lowStockThreshold ?? 0))}`}>
+                    {getStockStatus(Number(product.stockQuantity ?? product.quantity ?? 0), Number(product.reorderLevel ?? product.lowStockThreshold ?? 0))}
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -443,14 +466,32 @@ const Products = () => {
                   <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">Price</p>
-                        <p className="text-xl font-bold text-primary-600">₦{Number(selectedProduct.price || 0).toFixed(2)}</p>
+                        <p className="text-sm font-semibold text-gray-900">Selling Price</p>
+                        <p className="text-xl font-bold text-primary-600">₦{Number(selectedProduct.sellingPrice ?? selectedProduct.price ?? 0).toFixed(2)}</p>
                       </div>
                       {selectedProduct.category && (
                         <span className="inline-flex rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-800">
                           {selectedProduct.category}
                         </span>
                       )}
+                    </div>
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-700">
+                      <div className="rounded-md bg-white p-2">
+                        <div className="text-gray-500">Cost Price</div>
+                        <div className="font-semibold">₦{Number(selectedProduct.costPrice ?? 0).toFixed(2)}</div>
+                      </div>
+                      <div className="rounded-md bg-white p-2">
+                        <div className="text-gray-500">Profit / Unit</div>
+                        <div className="font-semibold">₦{(Number(selectedProduct.sellingPrice ?? selectedProduct.price ?? 0) - Number(selectedProduct.costPrice ?? 0)).toFixed(2)}</div>
+                      </div>
+                      <div className="rounded-md bg-white p-2">
+                        <div className="text-gray-500">Stock Quantity</div>
+                        <div className="font-semibold">{Number(selectedProduct.stockQuantity ?? selectedProduct.quantity ?? 0)}</div>
+                      </div>
+                      <div className="rounded-md bg-white p-2">
+                        <div className="text-gray-500">Reorder Level</div>
+                        <div className="font-semibold">{Number(selectedProduct.reorderLevel ?? selectedProduct.lowStockThreshold ?? 0)}</div>
+                      </div>
                     </div>
                   </div>
 
@@ -568,12 +609,12 @@ const Products = () => {
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Price (₦)
+                          Selling Price (₦)
                         </label>
                         <input
                           type="number"
-                          name="price"
-                          value={formData.price}
+                          name="sellingPrice"
+                          value={formData.sellingPrice}
                           onChange={handleInputChange}
                           required
                           min="0"
@@ -583,14 +624,44 @@ const Products = () => {
                       </div>
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Quantity
+                          Cost Price (₦)
                         </label>
                         <input
                           type="number"
-                          name="quantity"
-                          value={formData.quantity}
+                          name="costPrice"
+                          value={formData.costPrice}
                           onChange={handleInputChange}
                           required
+                          min="0"
+                          step="0.01"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Stock Quantity
+                        </label>
+                        <input
+                          type="number"
+                          name="stockQuantity"
+                          value={formData.stockQuantity}
+                          onChange={handleInputChange}
+                          required
+                          min="0"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Reorder Level
+                        </label>
+                        <input
+                          type="number"
+                          name="reorderLevel"
+                          value={formData.reorderLevel}
+                          onChange={handleInputChange}
                           min="0"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                         />
@@ -611,35 +682,20 @@ const Products = () => {
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Category
-                        </label>
-                        <select
-                          name="category"
-                          value={formData.category}
-                          onChange={handleInputChange}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                        >
-                          {categories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Low Stock Threshold
-                        </label>
-                        <input
-                          type="number"
-                          name="lowStockThreshold"
-                          value={formData.lowStockThreshold}
-                          onChange={handleInputChange}
-                          min="1"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
-                        />
-                      </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Category
+                      </label>
+                      <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                      >
+                        {categories.map(cat => (
+                          <option key={cat} value={cat}>{cat}</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">

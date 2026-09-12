@@ -105,21 +105,21 @@ const Dashboard = () => {
       value: currencyFormatter.format(summary.totalRevenue || 0),
       detail: `${currencyFormatter.format(averageSale)} average sale`,
       icon: BanknotesIcon,
-      accent: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+      accent: 'bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300',
     },
     {
       name: 'Sales Completed',
       value: compactNumber.format(summary.totalSales || 0),
       detail: `${recentSales.length} shown in recent activity`,
       icon: ShoppingBagIcon,
-      accent: 'bg-sky-100 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300',
+      accent: 'bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300',
     },
     {
       name: 'Products Managed',
       value: compactNumber.format(summary.totalProducts || 0),
       detail: 'Active catalog coverage',
       icon: CubeIcon,
-      accent: 'bg-violet-100 text-violet-700 dark:bg-violet-500/15 dark:text-violet-300',
+      accent: 'bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300',
     },
     {
       name: 'Low Stock',
@@ -128,8 +128,8 @@ const Dashboard = () => {
       icon: ExclamationTriangleIcon,
       accent:
         summary.lowStockProducts > 0
-          ? 'bg-rose-100 text-rose-700 dark:bg-rose-500/15 dark:text-rose-300'
-          : 'bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300',
+          ? 'bg-primary-200 text-primary-900 dark:bg-primary-400/20 dark:text-primary-200'
+          : 'bg-primary-100 text-primary-700 dark:bg-primary-500/15 dark:text-primary-300',
     },
   ];
 
@@ -139,7 +139,7 @@ const Dashboard = () => {
         <div className="grid gap-6 p-5 sm:p-6 xl:grid-cols-[1fr_420px]">
           <div>
             <div className="flex flex-wrap items-center gap-3">
-              <span className="rounded-md bg-emerald-100 px-3 py-1.5 text-sm font-bold text-emerald-800 dark:bg-emerald-500/15 dark:text-emerald-300">
+              <span className="rounded-md bg-primary-100 px-3 py-1.5 text-sm font-bold text-primary-800 dark:bg-primary-500/15 dark:text-primary-300">
                 Live dashboard
               </span>
               <span className="text-sm text-slate-500 dark:text-slate-400">
@@ -192,11 +192,11 @@ const Dashboard = () => {
                 value={businessNameInput}
                 onChange={(e) => setBusinessNameInput(e.target.value)}
                 placeholder="Enter your business name"
-                className="min-h-[42px] flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm focus:border-emerald-600 focus:outline-none focus:ring-2 focus:ring-emerald-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                className="min-h-[42px] flex-1 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-950 shadow-sm focus:border-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-600/20 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
               />
               <button
                 type="submit"
-                className="inline-flex min-h-[42px] items-center justify-center rounded-md bg-emerald-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-800"
+                className="inline-flex min-h-[42px] items-center justify-center rounded-md bg-primary-700 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-primary-800"
               >
                 Save
               </button>
@@ -231,14 +231,14 @@ const Dashboard = () => {
         <div className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-6">
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="text-sm font-semibold uppercase text-emerald-700 dark:text-emerald-300">Sales trend</p>
+              <p className="text-sm font-semibold uppercase text-primary-700 dark:text-primary-300">Sales trend</p>
               <h2 className="mt-1 text-xl font-black text-slate-950 dark:text-white">Recent revenue movement</h2>
             </div>
             <button
               type="button"
               onClick={fetchDashboardData}
               disabled={loading}
-              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
+              className="inline-flex items-center gap-2 rounded-md border border-slate-300 bg-white px-3 py-2 text-sm font-bold text-slate-700 shadow-sm transition hover:border-primary-300 hover:text-primary-800 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200"
             >
               <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -282,7 +282,7 @@ const Dashboard = () => {
         <div className="rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="flex items-center justify-between border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
             <div>
-              <p className="text-sm font-semibold uppercase text-emerald-700 dark:text-emerald-300">Activity</p>
+              <p className="text-sm font-semibold uppercase text-primary-700 dark:text-primary-300">Activity</p>
               <h2 className="mt-1 text-xl font-black text-slate-950 dark:text-white">Recent sales</h2>
             </div>
             <span className="rounded-md bg-slate-100 px-3 py-1.5 text-sm font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
