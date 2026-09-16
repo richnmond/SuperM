@@ -1,5 +1,6 @@
 const Sale = require('../models/Sale');
 const Expense = require('../models/Expense');
+const mongoose = require('mongoose');
 const { getProfitOverview } = require('../services/profitService');
 
 const getPreviousRange = (startDate, endDate) => {
@@ -73,8 +74,11 @@ const aggregateExpenseTotal = async (match) => {
 
 const getProfitSummary = async (req, res) => {
   try {
-    const { startDate, endDate } = req.query;
-    const data = await getProfitOverview(req.user._id, startDate, endDate);
+    const { startDate, endDate, customerId } = req.query;
+    const normalizedCustomerId = customerId && mongoose.Types.ObjectId.isValid(customerId)
+      ? customerId
+      : undefined;
+    const data = await getProfitOverview(req.user._id, startDate, endDate, normalizedCustomerId);
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
-import { PlusIcon, PencilIcon, TrashIcon, PhoneIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
+import { PlusIcon, PencilIcon, TrashIcon, PhoneIcon, EnvelopeIcon, EyeIcon } from '@heroicons/react/24/outline';
 import { API_BASE_URL } from '../config';
 
 const defaultForm = {
@@ -23,6 +23,7 @@ const Customers = () => {
   const [editing, setEditing] = useState(null);
   const [formData, setFormData] = useState(defaultForm);
   const [search, setSearch] = useState('');
+  const [purchaseHistory, setPurchaseHistory] = useState(null);
 
   const fetchCustomers = async () => {
     try {
@@ -125,6 +126,15 @@ const Customers = () => {
     }
   };
 
+  const handleViewPurchases = async (customer) => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/api/customers/${customer._id}/purchases`);
+      setPurchaseHistory(data);
+    } catch (error) {
+      toast.error('Failed to load purchase history');
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -221,6 +231,9 @@ const Customers = () => {
                   </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button type="button" onClick={() => handleViewPurchases(customer)} className="mr-4 text-slate-600 hover:text-slate-900" title="View purchase history">
+                    <EyeIcon className="h-5 w-5" />
+                  </button>
                   <button type="button" onClick={() => handleEdit(customer)} className="mr-4 text-primary-600 hover:text-primary-900">
                     <PencilIcon className="h-5 w-5" />
                   </button>
@@ -350,6 +363,43 @@ const Customers = () => {
                   </button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {purchaseHistory && (
+        <div className="fixed inset-0 z-20 overflow-y-auto">
+          <div className="flex min-h-screen items-center justify-center px-4 py-8">
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75" onClick={() => setPurchaseHistory(null)}></div>
+            <div className="relative w-full max-w-3xl rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">{purchaseHistory.customer.name} Purchase History</h3>
+                  <p className="mt-1 text-sm text-gray-500">Total spent: ₦{Number(purchaseHistory.summary.totalSpent || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                </div>
+                <button type="button" onClick={() => setPurchaseHistory(null)} className="text-2xl text-gray-500" aria-label="Close">&times;</button>
+              </div>
+              <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div>
+                  <h4 className="mb-2 font-medium text-gray-900 dark:text-gray-100">Products purchased</h4>
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    {purchaseHistory.summary.products.map((product) => (
+                      <div key={product.productId} className="flex justify-between gap-4"><span>{product.productName} x {product.quantity}</span><span>₦{product.totalSpent.toLocaleString()}</span></div>
+                    ))}
+                    {!purchaseHistory.summary.products.length && <p>No products purchased yet.</p>}
+                  </div>
+                </div>
+                <div>
+                  <h4 className="mb-2 font-medium text-gray-900 dark:text-gray-100">Transactions</h4>
+                  <div className="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                    {purchaseHistory.sales.map((sale) => (
+                      <div key={sale._id} className="flex justify-between gap-4"><span>#{sale.saleId}</span><span>₦{Number(sale.totalAmount).toLocaleString()}</span></div>
+                    ))}
+                    {!purchaseHistory.sales.length && <p>No transactions yet.</p>}
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -62,6 +62,11 @@ const saleSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  customerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Customer',
+    default: null
+  },
   cashier: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

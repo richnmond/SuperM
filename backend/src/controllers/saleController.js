@@ -1,12 +1,19 @@
 const Sale = require('../models/Sale');
 const Product = require('../models/Product');
+const Customer = require('../models/Customer');
 const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
 const fs = require('fs');
 
 const createSale = async (req, res) => {
   try {
-    const { items, paymentMethod, totalAmount } = req.body;
+    const { items, paymentMethod, totalAmount, customerId } = req.body;
+    if (customerId) {
+      const customer = await Customer.findById(customerId);
+      if (!customer) {
+        return res.status(404).json({ message: 'Customer not found' });
+      }
+    }
     let totalCost = 0;
     const itemsWithCost = [];
     let computedTotalAmount = 0;
@@ -48,6 +55,7 @@ const createSale = async (req, res) => {
       totalAmount: Number((Number(totalAmount || computedTotalAmount)).toFixed(2)),
       totalCost,
       paymentMethod,
+      customerId: customerId || null,
       cashier: req.user._id
     });
 
@@ -66,8 +74,10 @@ const createSale = async (req, res) => {
 
 const getSales = async (req, res) => {
   try {
-    const { startDate, endDate, period } = req.query;
+    const { startDate, endDate, period, customerId } = req.query;
     let query = { cashier: req.user._id };
+
+    if (customerId) query.customerId = customerId;
 
     if (startDate && endDate) {
       query.createdAt = {
@@ -97,6 +107,7 @@ const getSales = async (req, res) => {
 
     const sales = await Sale.find(query)
       .populate('cashier', 'username')
+      .populate('customerId', 'name phone email')
       .sort({ createdAt: -1 });
 
     res.json(sales);

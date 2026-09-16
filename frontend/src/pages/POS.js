@@ -13,6 +13,8 @@ const POS = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('cash');
+  const [customers, setCustomers] = useState([]);
+  const [customerId, setCustomerId] = useState('');
   const [loading, setLoading] = useState(true);
   const [showScanner, setShowScanner] = useState(false);
   const [receiptSale, setReceiptSale] = useState(null);
@@ -31,6 +33,7 @@ const POS = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchCustomers();
   }, []);
 
   useEffect(() => {
@@ -50,6 +53,15 @@ const POS = () => {
       toast.error('Failed to fetch products');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCustomers = async () => {
+    try {
+      const { data } = await axios.get(`${API_BASE_URL}/api/customers`);
+      setCustomers(data);
+    } catch (error) {
+      toast.error('Failed to fetch customers');
     }
   };
 
@@ -153,13 +165,15 @@ const POS = () => {
       const { data: sale } = await axios.post(`${API_BASE_URL}/api/sales`, {
         items: cart,
         totalAmount: calculateTotal(),
-        paymentMethod
+        paymentMethod,
+        customerId: customerId || undefined
       });
 
       toast.success('Sale completed successfully');
       setReceiptSale(sale);
       setShowReceipt(true);
       setCart([]);
+      setCustomerId('');
       fetchProducts();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Checkout failed');
@@ -300,6 +314,20 @@ const POS = () => {
               <div className="flex justify-between text-lg font-medium">
                 <span>Total:</span>
                 <span>N{calculateTotal().toFixed(2)}</span>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Customer (optional)</label>
+                <select
+                  value={customerId}
+                  onChange={(e) => setCustomerId(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                >
+                  <option value="">Walk-in customer</option>
+                  {customers.map((customer) => (
+                    <option key={customer._id} value={customer._id}>{customer.name}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

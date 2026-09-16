@@ -2,6 +2,7 @@ const express = require('express');
 const {
   getProducts,
   getProductById,
+  getInventoryValuation,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -15,6 +16,8 @@ const router = express.Router();
 router.route('/')
   .get(protect, getProducts)
   .post(protect, admin, upload.single('image'), createProduct);
+
+router.get('/valuation', protect, getInventoryValuation);
 
 router.route('/:id')
   .get(protect, getProductById)

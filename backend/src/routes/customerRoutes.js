@@ -5,7 +5,8 @@ const {
   createCustomer,
   updateCustomer,
   deleteCustomer,
-  customerSummary
+  customerSummary,
+  getCustomerPurchases
 } = require('../controllers/customerController');
 
 const router = express.Router();
@@ -15,6 +16,7 @@ router.route('/')
   .post(protect, createCustomer);
 
 router.route('/summary').get(protect, customerSummary);
+router.route('/:id/purchases').get(protect, getCustomerPurchases);
 
 router.route('/:id')
   .put(protect, updateCustomer)

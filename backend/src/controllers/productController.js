@@ -83,6 +83,40 @@ const getProductById = async (req, res) => {
   }
 };
 
+const getInventoryValuation = async (_req, res) => {
+  try {
+    const products = await Product.find().select('name quantity stockQuantity costPrice sellingPrice price').sort({ name: 1 });
+    const valuation = products.map((product) => {
+      const availableStock = Number(product.quantity ?? product.stockQuantity ?? 0);
+      const costPrice = Number(product.costPrice || 0);
+      const sellingPrice = Number(product.sellingPrice ?? product.price ?? 0);
+      const totalCostValue = availableStock * costPrice;
+      const totalSellingValue = availableStock * sellingPrice;
+      return {
+        productId: product._id,
+        name: product.name,
+        availableStock,
+        costPrice,
+        sellingPrice,
+        totalCostValue,
+        totalSellingValue,
+        potentialProfit: totalSellingValue - totalCostValue
+      };
+    });
+
+    res.json({
+      products: valuation,
+      totals: valuation.reduce((totals, product) => ({
+        totalCostValue: totals.totalCostValue + product.totalCostValue,
+        totalSellingValue: totals.totalSellingValue + product.totalSellingValue,
+        potentialProfit: totals.potentialProfit + product.potentialProfit
+      }), { totalCostValue: 0, totalSellingValue: 0, potentialProfit: 0 })
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 const createProduct = async (req, res) => {
   try {
     const productData = normalizeProductFields({
@@ -189,6 +223,7 @@ const updateStock = async (req, res) => {
 module.exports = {
   getProducts,
   getProductById,
+  getInventoryValuation,
   createProduct,
   updateProduct,
   deleteProduct,

@@ -215,7 +215,7 @@ const getProfitTrend = async (saleMatch, expenseMatch, start, end) => {
   return Object.values(trendMap);
 };
 
-const getProfitOverview = async (userId, startDate, endDate) => {
+const getProfitOverview = async (userId, startDate, endDate, customerId) => {
   const { start: currentStart, end: currentEnd } = getCurrentRange(startDate, endDate);
   const { previousStart, previousEnd } = getPreviousRange(currentStart, currentEnd);
 
@@ -227,6 +227,10 @@ const getProfitOverview = async (userId, startDate, endDate) => {
     cashier: userId,
     createdAt: { $gte: previousStart, $lte: previousEnd }
   };
+  if (customerId) {
+    currentSalesMatch.customerId = customerId;
+    previousSalesMatch.customerId = customerId;
+  }
   const currentExpenseMatch = {
     recordedBy: userId,
     incurredOn: { $gte: currentStart, $lte: currentEnd }

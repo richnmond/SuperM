@@ -207,6 +207,20 @@ const Profit = () => {
   const [endDate, setEndDate] = useState(formatInputDate(endOfMonth()));
   const [loading, setLoading] = useState(true);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [customers, setCustomers] = useState([]);
+  const [customerId, setCustomerId] = useState('');
+
+  useEffect(() => {
+    const loadCustomers = async () => {
+      try {
+        const { data } = await axios.get(`${API_BASE_URL}/api/customers`);
+        setCustomers(data);
+      } catch (error) {
+        toast.error('Unable to fetch customers');
+      }
+    };
+    loadCustomers();
+  }, []);
 
   useEffect(() => {
     const range = getFilterRange(selectedFilter);
@@ -245,6 +259,7 @@ const Profit = () => {
       const params = new URLSearchParams();
       params.append('startDate', new Date(startDate).toISOString());
       params.append('endDate', new Date(endDate).toISOString());
+      if (customerId) params.append('customerId', customerId);
       const { data } = await axios.get(`${API_BASE_URL}/api/profit/summary?${params.toString()}`);
       setSummary(data);
       setProfitTrend(data.profitTrend || []);
@@ -317,6 +332,17 @@ const Profit = () => {
               </div>
             </div>
           )}
+
+          <select
+            value={customerId}
+            onChange={(e) => setCustomerId(e.target.value)}
+            className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-700"
+          >
+            <option value="">All Customers</option>
+            {customers.map((customer) => (
+              <option key={customer._id} value={customer._id}>{customer.name}</option>
+            ))}
+          </select>
 
           <button
             onClick={loadSummary}

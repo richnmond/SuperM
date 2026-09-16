@@ -26,6 +26,7 @@ const Products = () => {
   const [image, setImage] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [valuation, setValuation] = useState({ products: [], totals: { totalCostValue: 0, totalSellingValue: 0, potentialProfit: 0 } });
 
   const categories = [
     'Groceries', 'Beverages', 'Snacks', 'Dairy', 'Meat', 'Produce', 'Household', 'Other'
@@ -33,6 +34,7 @@ const Products = () => {
 
   useEffect(() => {
     fetchProducts();
+    fetchValuation();
   }, [searchTerm, categoryFilter]);
 
   useEffect(() => {
@@ -63,6 +65,17 @@ const Products = () => {
       setLoading(false);
     }
   };
+
+  const fetchValuation = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/products/valuation`);
+      setValuation(response.data);
+    } catch (error) {
+      toast.error('Failed to fetch inventory valuation');
+    }
+  };
+
+  const formatMoney = (value) => `₦${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
   const handleInputChange = (e) => {
     setFormData({
@@ -248,7 +261,7 @@ const Products = () => {
 
   const getStockStatusColor = (quantity, threshold) => {
     if (quantity === 0) return 'bg-red-100 text-red-800';
-    if (quantity <= threshold) return 'bg-primary-100 text-primary-800';
+    if (quantity <= threshold) return 'bg-red-50 text-red-700';
     return 'bg-primary-50 text-primary-700';
   };
 
@@ -311,6 +324,24 @@ const Products = () => {
           </div>
         </div>
       </div>
+
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-xl font-semibold text-gray-900">Inventory valuation</h2>
+          <p className="text-sm text-gray-500">Current stock value and potential margin. This is separate from actual profit.</p>
+        </div>
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Cost Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalCostValue)}</p></div>
+          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Selling Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalSellingValue)}</p></div>
+          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Potential Profit</p><p className="mt-2 text-2xl font-bold text-primary-700">{formatMoney(valuation.totals.potentialProfit)}</p></div>
+        </div>
+        <div className="overflow-x-auto rounded-lg bg-white shadow">
+          <table className="min-w-full divide-y divide-gray-200 text-sm">
+            <thead className="bg-gray-50"><tr><th className="px-4 py-3 text-left">Product</th><th className="px-4 py-3 text-right">Available Stock</th><th className="px-4 py-3 text-right">Cost Price</th><th className="px-4 py-3 text-right">Selling Price</th><th className="px-4 py-3 text-right">Total Cost Value</th><th className="px-4 py-3 text-right">Total Selling Value</th><th className="px-4 py-3 text-right">Potential Profit</th></tr></thead>
+            <tbody className="divide-y divide-gray-200">{valuation.products.map((product) => <tr key={product.productId}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-right">{product.availableStock}</td><td className="px-4 py-3 text-right">{formatMoney(product.costPrice)}</td><td className="px-4 py-3 text-right">{formatMoney(product.sellingPrice)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalCostValue)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalSellingValue)}</td><td className="px-4 py-3 text-right font-medium text-primary-700">{formatMoney(product.potentialProfit)}</td></tr>)}</tbody>
+          </table>
+        </div>
+      </section>
 
       {/* Products Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -393,18 +424,18 @@ const Products = () => {
                       aria-label={`View description for ${product.name}`}
                     >
                       <EyeIcon className="mr-1.5 h-4 w-4" />
-                      View Description
+                      View
                     </button>
                     <button
                       onClick={() => handleEdit(product)}
-                      className="text-primary-600 hover:text-primary-900"
+                      className="rounded-md border border-primary-200 bg-primary-50 p-2 text-primary-700 shadow-sm hover:border-primary-300 hover:bg-primary-100 hover:text-primary-900 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
                       aria-label={`Edit ${product.name}`}
                     >
                       <PencilIcon className="h-5 w-5" />
                     </button>
                     <button
                       onClick={() => handleDelete(product._id)}
-                      className="text-red-600 hover:text-red-900"
+                      className="rounded-md border border-red-200 bg-red-50 p-2 text-red-700 shadow-sm hover:border-red-300 hover:bg-red-100 hover:text-red-900 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
                       aria-label={`Delete ${product.name}`}
                     >
                       <TrashIcon className="h-5 w-5" />

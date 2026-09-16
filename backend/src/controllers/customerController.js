@@ -1,4 +1,5 @@
 const Customer = require('../models/Customer');
+const Sale = require('../models/Sale');
 
 const listCustomers = async (req, res) => {
   try {
@@ -90,10 +91,46 @@ const customerSummary = async (_req, res) => {
   }
 };
 
+const getCustomerPurchases = async (req, res) => {
+  try {
+    const customer = await Customer.findById(req.params.id).select('name phone email');
+    if (!customer) {
+      return res.status(404).json({ message: 'Customer not found' });
+    }
+
+    const sales = await Sale.find({ customerId: customer._id, cashier: req.user._id })
+      .populate('cashier', 'username')
+      .sort({ createdAt: -1 });
+    const summary = sales.reduce((result, sale) => {
+      result.totalSpent += Number(sale.totalAmount || 0);
+      sale.items.forEach((item) => {
+        const existing = result.products.find((product) => product.productId === String(item.productId));
+        if (existing) {
+          existing.quantity += item.quantity;
+          existing.totalSpent += Number(item.subtotal || 0);
+        } else {
+          result.products.push({
+            productId: String(item.productId),
+            productName: item.productName,
+            quantity: item.quantity,
+            totalSpent: Number(item.subtotal || 0)
+          });
+        }
+      });
+      return result;
+    }, { totalSpent: 0, products: [] });
+
+    res.json({ customer, summary, sales });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   listCustomers,
   createCustomer,
   updateCustomer,
   deleteCustomer,
-  customerSummary
+  customerSummary,
+  getCustomerPurchases
 };
