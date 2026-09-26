@@ -1,5 +1,7 @@
 const Product = require('../models/Product');
 
+const PRODUCT_UNITS = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
+
 const generateUniqueBarcode = async () => {
   let barcode;
   let exists = true;
@@ -30,6 +32,7 @@ const normalizeProductFields = (productData = {}) => {
   const costPrice = Number(productData.costPrice ?? 0);
   const stockQuantity = Number(productData.stockQuantity ?? productData.quantity ?? 0);
   const reorderLevel = Number(productData.reorderLevel ?? productData.lowStockThreshold ?? 20);
+  const unit = PRODUCT_UNITS.includes(productData.unit) ? productData.unit : 'Piece';
 
   return {
     ...productData,
@@ -40,6 +43,7 @@ const normalizeProductFields = (productData = {}) => {
     quantity: stockQuantity,
     reorderLevel,
     lowStockThreshold: reorderLevel,
+    unit,
     profitPerUnit: Number((sellingPrice - costPrice).toFixed(2))
   };
 };
@@ -85,7 +89,7 @@ const getProductById = async (req, res) => {
 
 const getInventoryValuation = async (_req, res) => {
   try {
-    const products = await Product.find().select('name quantity stockQuantity costPrice sellingPrice price').sort({ name: 1 });
+    const products = await Product.find().select('name unit quantity stockQuantity costPrice sellingPrice price').sort({ name: 1 });
     const valuation = products.map((product) => {
       const availableStock = Number(product.quantity ?? product.stockQuantity ?? 0);
       const costPrice = Number(product.costPrice || 0);
@@ -95,6 +99,7 @@ const getInventoryValuation = async (_req, res) => {
       return {
         productId: product._id,
         name: product.name,
+        unit: product.unit || 'Piece',
         availableStock,
         costPrice,
         sellingPrice,
@@ -204,7 +209,10 @@ const deleteProduct = async (req, res) => {
 
 const updateStock = async (req, res) => {
   try {
-    const { quantity } = req.body;
+    const quantity = Number(req.body.quantity);
+    if (!Number.isFinite(quantity) || quantity < 0) {
+      return res.status(400).json({ message: 'Stock quantity must be a non-negative number' });
+    }
     const product = await Product.findById(req.params.id);
 
     if (!product) {

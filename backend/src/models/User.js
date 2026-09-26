@@ -23,6 +23,24 @@ const userSchema = new mongoose.Schema({
     enum: ['admin', 'staff'],
     default: 'admin'
   },
+  businessId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Business',
+    default: null
+  },
+  isActive: {
+    type: Boolean,
+    default: true
+  },
+  activatedLicenseId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'License',
+    default: null
+  },
+  licenseActivatedAt: {
+    type: Date,
+    default: null
+  },
   businessName: {
     type: String,
     trim: true,

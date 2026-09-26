@@ -107,7 +107,7 @@ const ReceiptModal = ({ sale, onClose }) => {
                             {item.productName || 'Item'}
                           </div>
                           <div className="text-xs text-gray-500 mt-0.5">
-                            {Number(item.quantity || 0)} × {formatMoney(item.price)}
+                            {Number(item.quantity || 0)} {item.unit || 'Piece'} × {formatMoney(item.price)}
                           </div>
                         </div>
                         <div className="text-sm font-semibold text-gray-900">

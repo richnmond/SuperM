@@ -5,6 +5,8 @@ const { createObjectCsvWriter } = require('csv-writer');
 const path = require('path');
 const fs = require('fs');
 
+const PRODUCT_UNITS = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
+
 const createSale = async (req, res) => {
   try {
     const { items, paymentMethod, totalAmount, customerId } = req.body;
@@ -24,22 +26,28 @@ const createSale = async (req, res) => {
       if (!product) {
         return res.status(404).json({ message: `Product ${item.productName} not found` });
       }
-      if (product.quantity < item.quantity) {
+      const quantity = Number(item.quantity);
+      if (!Number.isFinite(quantity) || quantity <= 0) {
+        return res.status(400).json({ message: `Quantity for ${product.name} must be greater than zero` });
+      }
+      if (product.quantity < quantity) {
         return res.status(400).json({ 
           message: `Insufficient stock for ${product.name}. Available: ${product.quantity}` 
         });
       }
 
-      const baseSubtotal = Number(item.subtotal || 0);
+      const baseSubtotal = Number((Number(product.price || product.sellingPrice || 0) * quantity).toFixed(2));
       const taxRate = Number(product.taxRate || 0);
       const taxAmount = baseSubtotal * (taxRate / 100);
       const taxedSubtotal = baseSubtotal + taxAmount;
 
       computedTotalAmount += taxedSubtotal;
-      const costSubtotal = (product.costPrice || 0) * item.quantity;
+      const costSubtotal = (product.costPrice || 0) * quantity;
       totalCost += costSubtotal;
       itemsWithCost.push({
         ...item,
+        unit: PRODUCT_UNITS.includes(product.unit) ? product.unit : 'Piece',
+        quantity,
         price: Number(product.price || item.price || 0),
         subtotal: taxedSubtotal,
         taxRate,
@@ -52,7 +60,7 @@ const createSale = async (req, res) => {
     // Create sale
     const sale = await Sale.create({
       items: itemsWithCost,
-      totalAmount: Number((Number(totalAmount || computedTotalAmount)).toFixed(2)),
+      totalAmount: Number(computedTotalAmount.toFixed(2)),
       totalCost,
       paymentMethod,
       customerId: customerId || null,
@@ -62,7 +70,7 @@ const createSale = async (req, res) => {
     // Update product quantities
     for (const item of items) {
       await Product.findByIdAndUpdate(item.productId, {
-        $inc: { quantity: -item.quantity }
+        $inc: { quantity: -Number(item.quantity), stockQuantity: -Number(item.quantity) }
       });
     }
 

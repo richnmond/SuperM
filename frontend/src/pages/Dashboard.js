@@ -21,6 +21,7 @@ import {
 } from 'recharts';
 import { useAuth } from '../context/AuthContext';
 import { API_BASE_URL } from '../config';
+import LicenseSummary from '../components/LicenseSummary';
 
 const currencyFormatter = new Intl.NumberFormat('en-NG', {
   style: 'currency',
@@ -135,6 +136,7 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      <LicenseSummary />
       <section className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="grid gap-6 p-5 sm:p-6 xl:grid-cols-[1fr_420px]">
           <div>

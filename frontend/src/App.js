@@ -15,6 +15,8 @@ import Suppliers from './pages/Suppliers';
 import Expenses from './pages/Expenses';
 import Profit from './pages/Profit';
 import Layout from './components/Layout';
+import OwnerPortal from './pages/OwnerPortal';
+import LicenseGate from './components/LicenseGate';
 
 
 function App() {
@@ -26,7 +28,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/app" element={<PrivateRoute><Layout /></PrivateRoute>}>
+            <Route path="/owner" element={<OwnerPortal />} />
+            <Route path="/owner/login" element={<OwnerPortal />} />
+            <Route path="/app" element={<PrivateRoute><LicenseGate><Layout /></LicenseGate></PrivateRoute>}>
               <Route index element={<Navigate to="/app/dashboard" />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="products" element={<Products />} />

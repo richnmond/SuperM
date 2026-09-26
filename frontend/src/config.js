@@ -7,8 +7,15 @@ const getApiBaseUrl = () => {
     return 'http://localhost:5000';
   }
 
+  const isElectron = navigator.userAgent.toLowerCase().includes('electron');
+  const isFileOrigin = window.location.protocol === 'file:';
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-  return isLocalhost ? 'http://localhost:5000' : window.location.origin;
+
+  if (isElectron || isFileOrigin || isLocalhost) {
+    return 'http://localhost:5000';
+  }
+
+  return window.location.origin;
 };
 
 export const API_BASE_URL = getApiBaseUrl();

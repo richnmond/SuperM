@@ -7,6 +7,8 @@ import ReceiptModal from '../components/ReceiptModal';
 import { API_BASE_URL } from '../config';
 
 const POS = () => {
+  const getUnit = (product) => product.unit || 'Piece';
+  const getQuantityStep = (unit) => ['Piece', 'Pack', 'Carton'].includes(unit) ? '1' : '0.001';
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -98,8 +100,8 @@ const POS = () => {
           item.productId === product._id
             ? {
                 ...item,
-                quantity: item.quantity + 1,
-                subtotal: (item.quantity + 1) * item.price * (1 + (item.taxRate || 0) / 100)
+                quantity: Number((item.quantity + Number(getQuantityStep(getUnit(product)))).toFixed(3)),
+                subtotal: (item.quantity + Number(getQuantityStep(getUnit(product)))) * item.price * (1 + (item.taxRate || 0) / 100)
               }
             : item
         )
@@ -117,6 +119,7 @@ const POS = () => {
         productName: product.name,
         price: product.price,
         quantity: 1,
+        unit: getUnit(product),
         subtotal,
         taxRate
       }
@@ -143,7 +146,7 @@ const POS = () => {
     setCart(
       cart.map((item) =>
         item.productId === productId
-          ? { ...item, quantity: newQuantity, subtotal: newQuantity * item.price * (1 + (item.taxRate || 0) / 100) }
+                          ? { ...item, quantity: Number(newQuantity), subtotal: newQuantity * item.price * (1 + (item.taxRate || 0) / 100) }
           : item
       )
     );
@@ -246,8 +249,8 @@ const POS = () => {
                     />
                   )}
                   <h3 className="font-medium text-gray-900">{product.name}</h3>
-                  <p className="text-sm text-gray-500">N{product.price.toFixed(2)}</p>
-                  <p className="text-xs text-gray-400 mt-1">Stock: {product.quantity}</p>
+                  <p className="text-sm text-gray-500">N{product.price.toFixed(2)} / {getUnit(product)}</p>
+                  <p className="text-xs text-gray-400 mt-1">Stock: {product.quantity} {getUnit(product)}</p>
                 </button>
               ))}
             </div>
@@ -271,7 +274,7 @@ const POS = () => {
                   <div key={item.productId} className="flex items-start space-x-2 pb-4 border-b">
                     <div className="flex-1">
                       <h4 className="text-sm font-medium text-gray-900">{item.productName}</h4>
-                      <p className="text-sm text-gray-500">N{item.price.toFixed(2)}</p>
+                      <p className="text-sm text-gray-500">N{item.price.toFixed(2)} / {item.unit || 'Piece'}</p>
                       <div className="flex items-center mt-2">
                         <button
                           onClick={() => updateCartQuantity(item.productId, item.quantity - 1)}
@@ -281,13 +284,14 @@ const POS = () => {
                         </button>
                         <input
                           type="number"
-                          min="1"
+                          min={getQuantityStep(item.unit || 'Piece')}
+                          step={getQuantityStep(item.unit || 'Piece')}
                           value={item.quantity}
-                          onChange={(e) => updateCartQuantity(item.productId, parseInt(e.target.value, 10) || 1)}
+                          onChange={(e) => updateCartQuantity(item.productId, Number(e.target.value) || 1)}
                           className="w-16 px-2 py-1 border-t border-b text-center"
                         />
                         <button
-                          onClick={() => updateCartQuantity(item.productId, item.quantity + 1)}
+                          onClick={() => updateCartQuantity(item.productId, item.quantity + Number(getQuantityStep(item.unit || 'Piece')))}
                           className="px-2 py-1 border rounded-r-md hover:bg-gray-50"
                         >
                           +

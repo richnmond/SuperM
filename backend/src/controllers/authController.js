@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const { linkBusinessUser } = require('../services/businessService');
 
 const getJwtExpiresIn = () => {
   const raw = process.env.JWT_EXPIRE;
@@ -48,6 +49,14 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
@@ -80,8 +89,14 @@ const updateProfile = async (req, res) => {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.businessName = businessName?.trim() || '';
-    await user.save();
+    const trimmedBusinessName = businessName?.trim() || '';
+    if (trimmedBusinessName) {
+      await linkBusinessUser(user, trimmedBusinessName);
+    } else {
+      user.businessName = '';
+      user.businessId = null;
+      await user.save();
+    }
 
     res.json({
       _id: user._id,

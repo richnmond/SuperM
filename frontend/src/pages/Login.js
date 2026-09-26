@@ -227,6 +227,9 @@ const Login = () => {
                     {isSignup ? 'Sign in' : 'Create an account'}
                   </button>
                 </p>
+                <Link to="/owner" className="mt-4 inline-block text-xs font-semibold text-slate-500 transition hover:text-primary-800">
+                  Platform owner sign in
+                </Link>
               </div>
             </div>
           </div>

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const PRODUCT_UNITS = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
+
 const productSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -15,6 +17,11 @@ const productSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true
+  },
+  unit: {
+    type: String,
+    enum: PRODUCT_UNITS,
+    default: 'Piece'
   },
   sellingPrice: {
     type: Number,

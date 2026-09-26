@@ -6,6 +6,7 @@ import { API_BASE_URL } from '../config';
 import BarcodeLabel from '../components/BarcodeLabel';
 
 const Products = () => {
+  const units = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
@@ -18,6 +19,7 @@ const Products = () => {
     sellingPrice: '',
     costPrice: '',
     taxRate: '0',
+    unit: 'Piece',
     stockQuantity: '',
     reorderLevel: '20',
     category: 'Groceries',
@@ -154,6 +156,7 @@ const Products = () => {
       sellingPrice: product.sellingPrice ?? product.price ?? 0,
       costPrice: product.costPrice ?? 0,
       taxRate: product.taxRate ?? 0,
+      unit: product.unit || 'Piece',
       stockQuantity: product.stockQuantity ?? product.quantity ?? 0,
       reorderLevel: product.reorderLevel ?? product.lowStockThreshold ?? 20,
       category: product.category,
@@ -239,6 +242,7 @@ const Products = () => {
       sellingPrice: '',
       costPrice: '',
       taxRate: '0',
+      unit: 'Piece',
       stockQuantity: '',
       reorderLevel: '20',
       category: 'Groceries',
@@ -338,7 +342,7 @@ const Products = () => {
         <div className="overflow-x-auto rounded-lg bg-white shadow">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50"><tr><th className="px-4 py-3 text-left">Product</th><th className="px-4 py-3 text-right">Available Stock</th><th className="px-4 py-3 text-right">Cost Price</th><th className="px-4 py-3 text-right">Selling Price</th><th className="px-4 py-3 text-right">Total Cost Value</th><th className="px-4 py-3 text-right">Total Selling Value</th><th className="px-4 py-3 text-right">Potential Profit</th></tr></thead>
-            <tbody className="divide-y divide-gray-200">{valuation.products.map((product) => <tr key={product.productId}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-right">{product.availableStock}</td><td className="px-4 py-3 text-right">{formatMoney(product.costPrice)}</td><td className="px-4 py-3 text-right">{formatMoney(product.sellingPrice)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalCostValue)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalSellingValue)}</td><td className="px-4 py-3 text-right font-medium text-primary-700">{formatMoney(product.potentialProfit)}</td></tr>)}</tbody>
+            <tbody className="divide-y divide-gray-200">{valuation.products.map((product) => <tr key={product.productId}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-right">{product.availableStock} {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.costPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.sellingPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalCostValue)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalSellingValue)}</td><td className="px-4 py-3 text-right font-medium text-primary-700">{formatMoney(product.potentialProfit)}</td></tr>)}</tbody>
           </table>
         </div>
       </section>
@@ -405,7 +409,7 @@ const Products = () => {
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>Cost: ₦{Number(product.costPrice ?? 0).toFixed(2)}</div>
-                  <div>Stock: {Number(product.stockQuantity ?? product.quantity ?? 0)}</div>
+                  <div>Stock: {Number(product.stockQuantity ?? product.quantity ?? 0)} {product.unit || 'Piece'}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <div>Profit: ₦{getProductProfit(product).toFixed(2)}</div>
@@ -517,7 +521,7 @@ const Products = () => {
                       </div>
                       <div className="rounded-md bg-white p-2">
                         <div className="text-gray-500">Stock Quantity</div>
-                        <div className="font-semibold">{Number(selectedProduct.stockQuantity ?? selectedProduct.quantity ?? 0)}</div>
+                        <div className="font-semibold">{Number(selectedProduct.stockQuantity ?? selectedProduct.quantity ?? 0)} {selectedProduct.unit || 'Piece'}</div>
                       </div>
                       <div className="rounded-md bg-white p-2">
                         <div className="text-gray-500">Reorder Level</div>
@@ -668,6 +672,19 @@ const Products = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                         />
                       </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Unit of Measurement
+                        </label>
+                        <select
+                          name="unit"
+                          value={formData.unit}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+                        >
+                          {units.map((unit) => <option key={unit} value={unit}>{unit}</option>)}
+                        </select>
+                      </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
@@ -681,6 +698,7 @@ const Products = () => {
                           onChange={handleInputChange}
                           required
                           min="0"
+                          step="0.001"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                         />
                       </div>
@@ -694,6 +712,7 @@ const Products = () => {
                           value={formData.reorderLevel}
                           onChange={handleInputChange}
                           min="0"
+                          step="0.001"
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                         />
                       </div>

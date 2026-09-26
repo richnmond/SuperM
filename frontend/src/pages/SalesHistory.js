@@ -163,7 +163,7 @@ const SalesHistory = () => {
                   <div className="text-sm text-gray-900">
                     {sale.items.map((item, index) => (
                       <div key={index}>
-                        {item.productName} x {item.quantity} (₦{item.subtotal.toFixed(2)})
+                        {item.productName} x {item.quantity} {item.unit || 'Piece'} (₦{item.subtotal.toFixed(2)})
                       </div>
                     ))}
                   </div>

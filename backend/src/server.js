@@ -14,6 +14,10 @@ const supplierRoutes = require('./routes/supplierRoutes');
 const customerRoutes = require('./routes/customerRoutes');
 const expenseRoutes = require('./routes/expenseRoutes');
 const profitRoutes = require('./routes/profitRoutes');
+const ownerRoutes = require('./routes/ownerRoutes');
+const licenseRoutes = require('./routes/licenseRoutes');
+const { protect, requireBusinessLicense } = require('./middleware/auth');
+const Owner = require('./models/Owner');
 const app = express();
 
 // Middleware
@@ -39,6 +43,9 @@ if (isProduction) {
 
 // Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/owner', ownerRoutes);
+app.use('/api/licenses', licenseRoutes);
+app.use('/api', protect, requireBusinessLicense);
 app.use('/api/products', productRoutes);
 app.use('/api/sales', saleRoutes);
 app.use('/api/barcode', barcodeRoutes);
@@ -55,7 +62,18 @@ app.use((err, req, res, next) => {
 
 // Database connection
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
+  .then(async () => {
+    console.log('Connected to MongoDB');
+    const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
+    const ownerPassword = process.env.OWNER_PASSWORD;
+    if (ownerEmail && ownerPassword) {
+      const existingOwner = await Owner.findOne({ email: ownerEmail });
+      if (!existingOwner) await Owner.create({ email: ownerEmail, password: ownerPassword });
+      console.log('Owner account is provisioned');
+    } else {
+      console.warn('Set OWNER_EMAIL and OWNER_PASSWORD to provision owner access');
+    }
+  })
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Create uploads directory if it doesn't exist

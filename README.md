@@ -47,6 +47,19 @@ SuperM brings together the core workflows needed to run a modern retail business
 - Access secure protected admin routes
 - Use a clean dashboard to monitor business performance
 
+### Platform owner management
+- Sign in separately at `/owner` with the platform owner account
+- Review businesses, users, branches, license status, and system activity
+- Search and filter businesses, manage branches, and suspend or reactivate accounts
+- Owner credentials are provisioned from backend environment variables; there is no public owner signup
+
+### License management
+- Issue one license per business with a generated key, plan, start date, and expiry date
+- Suspend or reactivate licenses, extend expiry dates, and change plans from the owner console
+- Business users activate their assigned key from the license screen before opening retail features
+- Protected retail APIs verify license status and dates on every request; expired, suspended, and unlicensed businesses are blocked
+- Electron uses the same activation screen and backend verification as the web application
+
 ## Local development
 
 ### 1) Backend setup
@@ -73,9 +86,11 @@ Create a `.env` file in the `backend` folder with the following values:
 PORT=5000
 MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority
 JWT_SECRET=your_super_secret_key
+OWNER_EMAIL=owner@example.com
+OWNER_PASSWORD=use-a-long-unique-password
 ```
 
-> Replace the MongoDB connection string and JWT secret with your real credentials before starting the app.
+> Replace the MongoDB connection string and JWT secret with your real credentials before starting the app. Set a unique owner email and strong password; the backend creates the owner account on first startup and stores the password as a bcrypt hash. Changing `OWNER_PASSWORD` does not reset an already-provisioned owner's password.
 
 ## Production deployment
 
