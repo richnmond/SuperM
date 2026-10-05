@@ -8,6 +8,13 @@ const { importLegacyBusinesses } = require('../services/businessService');
 const { generateLicenseKey, getLicenseStatus, importLegacyLicenses } = require('../services/licenseService');
 
 const licensePlans = ['starter', 'professional', 'enterprise'];
+const minimumLicenseDays = 30;
+
+const getMinimumExpiryDate = (startDate) => {
+  const minimumExpiryDate = new Date(startDate);
+  minimumExpiryDate.setUTCDate(minimumExpiryDate.getUTCDate() + minimumLicenseDays);
+  return minimumExpiryDate;
+};
 
 const recordOwnerActivity = (action, description, businessId) => OwnerActivity.create({ action, description, businessId });
 
@@ -185,10 +192,12 @@ const createLicense = async (req, res) => {
   try {
     const { businessId, plan } = req.body;
     const startDate = req.body.startDate ? new Date(req.body.startDate) : new Date();
-    const expiryDate = req.body.expiryDate ? new Date(req.body.expiryDate) : new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
+    const expiryDate = req.body.expiryDate
+      ? new Date(`${req.body.expiryDate}T23:59:59.999Z`)
+      : new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000);
     if (!businessId || !licensePlans.includes(plan)) return res.status(400).json({ message: 'Business and a valid plan are required' });
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(expiryDate.getTime()) || expiryDate <= startDate) {
-      return res.status(400).json({ message: 'Expiry date must be later than the start date' });
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(expiryDate.getTime()) || expiryDate < getMinimumExpiryDate(startDate)) {
+      return res.status(400).json({ message: 'License duration must be at least 30 days' });
     }
     const business = await Business.findById(businessId);
     if (!business) return res.status(404).json({ message: 'Business not found' });
@@ -235,6 +244,31 @@ const extendLicense = async (req, res) => {
   }
 };
 
+const setLicenseExpiry = async (req, res) => {
+  try {
+    const { expiryDate: expiryDateValue } = req.body;
+    if (typeof expiryDateValue !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(expiryDateValue)) {
+      return res.status(400).json({ message: 'Provide a valid expiry date' });
+    }
+    const expiryDate = new Date(`${expiryDateValue}T23:59:59.999Z`);
+    if (Number.isNaN(expiryDate.getTime()) || expiryDate.toISOString().slice(0, 10) !== expiryDateValue) {
+      return res.status(400).json({ message: 'Provide a valid expiry date' });
+    }
+    const license = await License.findById(req.params.id).populate('business', 'name');
+    if (!license) return res.status(404).json({ message: 'License not found' });
+    if (expiryDate < getMinimumExpiryDate(license.startDate)) {
+      return res.status(400).json({ message: 'License duration must be at least 30 days from its start date' });
+    }
+    const previousExpiry = license.expiryDate.toISOString().slice(0, 10);
+    license.expiryDate = expiryDate;
+    await license.save();
+    await recordOwnerActivity('license_expiry_changed', `License for ${license.business.name} expiry changed from ${previousExpiry} to ${expiryDateValue}`, license.business._id);
+    res.json({ ...license.toObject(), effectiveStatus: getLicenseStatus(license) });
+  } catch (error) {
+    res.status(400).json({ message: 'Could not update license expiry date' });
+  }
+};
+
 const changeLicensePlan = async (req, res) => {
   try {
     const { plan } = req.body;
@@ -251,4 +285,4 @@ const changeLicensePlan = async (req, res) => {
   }
 };
 
-module.exports = { login, getDashboard, listBusinesses, getBusiness, updateBusinessStatus, updateUserStatus, addBranch, removeBranch, getActivity, listLicenses, createLicense, updateLicenseStatus, extendLicense, changeLicensePlan };
+module.exports = { login, getDashboard, listBusinesses, getBusiness, updateBusinessStatus, updateUserStatus, addBranch, removeBranch, getActivity, listLicenses, createLicense, updateLicenseStatus, extendLicense, setLicenseExpiry, changeLicensePlan };

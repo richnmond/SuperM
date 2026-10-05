@@ -1,4 +1,5 @@
 const Product = require('../models/Product');
+const { uploadFile, removeProductImages } = require('../services/storageService');
 
 const PRODUCT_UNITS = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
 
@@ -46,6 +47,51 @@ const normalizeProductFields = (productData = {}) => {
     unit,
     profitPerUnit: Number((sellingPrice - costPrice).toFixed(2))
   };
+};
+
+const getUploadedFiles = (files = {}) => [...(files.image || []), ...(files.images || [])];
+
+const getProductImageUrls = (product) => [...new Set([...(product.images || []), product.image].filter(Boolean))];
+
+const parseRetainedImages = (value, existingImages) => {
+  if (value === undefined) return existingImages;
+
+  let requestedImages;
+  try {
+    requestedImages = JSON.parse(value);
+  } catch (_error) {
+    const error = new Error('The retained product image list is invalid.');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!Array.isArray(requestedImages)) {
+    const error = new Error('The retained product image list must be an array.');
+    error.statusCode = 400;
+    throw error;
+  }
+  return [...new Set(requestedImages.filter((image) => typeof image === 'string' && existingImages.includes(image)))];
+};
+
+const safelyRemoveProductImages = async (imageUrls) => {
+  try {
+    await removeProductImages(imageUrls);
+  } catch (error) {
+    console.error(error.message);
+  }
+};
+
+const uploadProductImages = async (files) => {
+  const imageUrls = [];
+  try {
+    for (const file of files) {
+      imageUrls.push(await uploadFile(file, { folder: 'products' }));
+    }
+  } catch (error) {
+    await safelyRemoveProductImages(imageUrls);
+    throw error;
+  }
+  return imageUrls;
 };
 
 const getProducts = async (req, res) => {
@@ -123,10 +169,13 @@ const getInventoryValuation = async (_req, res) => {
 };
 
 const createProduct = async (req, res) => {
+  const uploadedImageUrls = [];
   try {
+    uploadedImageUrls.push(...await uploadProductImages(getUploadedFiles(req.files)));
     const productData = normalizeProductFields({
       ...req.body,
-      image: req.file ? `/uploads/${req.file.filename}` : null
+      image: uploadedImageUrls[0] || null,
+      images: uploadedImageUrls
     });
 
     if (productData.costPrice === undefined) {
@@ -141,24 +190,33 @@ const createProduct = async (req, res) => {
     const product = await Product.create(productData);
     res.status(201).json(product);
   } catch (error) {
+    if (uploadedImageUrls.length > 0) await safelyRemoveProductImages(uploadedImageUrls);
     if (error.code === 11000 && error.keyPattern?.barcode) {
       return res.status(400).json({ message: 'Barcode already exists' });
     }
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message || 'Unable to create product' });
   }
 };
 
 const updateProduct = async (req, res) => {
+  const uploadedImageUrls = [];
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
 
-    const fieldsToSet = normalizeProductFields({
-      ...req.body,
-      updatedAt: Date.now()
-    });
+    const existingImages = getProductImageUrls(product);
+    const uploadedFiles = getUploadedFiles(req.files);
+    const hasImageChanges = req.body.retainedImages !== undefined || uploadedFiles.length > 0;
+    const retainedImages = hasImageChanges
+      ? parseRetainedImages(req.body.retainedImages, existingImages)
+      : existingImages;
+    uploadedImageUrls.push(...await uploadProductImages(uploadedFiles));
+
+    const productFields = { ...req.body };
+    delete productFields.retainedImages;
+    const fieldsToSet = normalizeProductFields({ ...productFields, updatedAt: Date.now() });
     if (fieldsToSet.costPrice === undefined) {
       fieldsToSet.costPrice = product.costPrice;
     }
@@ -172,8 +230,10 @@ const updateProduct = async (req, res) => {
       fieldsToSet.barcode = product.barcode || (await generateUniqueBarcode());
     }
 
-    if (req.file) {
-      fieldsToSet.image = `/uploads/${req.file.filename}`;
+    const nextImages = [...new Set([...retainedImages, ...uploadedImageUrls])];
+    if (hasImageChanges) {
+      fieldsToSet.images = nextImages;
+      fieldsToSet.image = nextImages[0] || null;
     }
 
     const updateQuery = { $set: fieldsToSet };
@@ -184,12 +244,16 @@ const updateProduct = async (req, res) => {
       { new: true }
     );
 
+    if (hasImageChanges) {
+      await safelyRemoveProductImages(existingImages.filter((image) => !nextImages.includes(image)));
+    }
     res.json(updatedProduct);
   } catch (error) {
+    if (uploadedImageUrls.length > 0) await safelyRemoveProductImages(uploadedImageUrls);
     if (error.code === 11000 && error.keyPattern?.barcode) {
       return res.status(400).json({ message: 'Barcode already exists' });
     }
-    res.status(500).json({ message: error.message });
+    res.status(error.statusCode || 500).json({ message: error.message || 'Unable to update product' });
   }
 };
 
@@ -200,7 +264,9 @@ const deleteProduct = async (req, res) => {
       return res.status(404).json({ message: 'Product not found' });
     }
 
+    const imageUrls = getProductImageUrls(product);
     await product.deleteOne();
+    await safelyRemoveProductImages(imageUrls);
     res.json({ message: 'Product deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: error.message });

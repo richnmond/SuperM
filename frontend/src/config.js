@@ -7,6 +7,10 @@ const getApiBaseUrl = () => {
     return 'http://localhost:5000';
   }
 
+  if (window.supermDesktop?.apiBaseUrl) {
+    return window.supermDesktop.apiBaseUrl.replace(/\/$/, '');
+  }
+
   const isElectron = navigator.userAgent.toLowerCase().includes('electron');
   const isFileOrigin = window.location.protocol === 'file:';
   const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);

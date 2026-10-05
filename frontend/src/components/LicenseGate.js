@@ -1,11 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { CheckBadgeIcon, ShieldExclamationIcon } from '@heroicons/react/24/outline';
 import { API_BASE_URL } from '../config';
 import { useAuth } from '../context/AuthContext';
 
 const LicenseGate = ({ children }) => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const [snapshot, setSnapshot] = useState(null);
   const [licenseKey, setLicenseKey] = useState('');
   const [message, setMessage] = useState('');
@@ -95,7 +97,7 @@ const LicenseGate = ({ children }) => {
           {message && <p role="alert" className="border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-800">{message}</p>}
           <div className="flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-4">
             <button type="button" onClick={loadLicense} className="text-sm font-bold text-emerald-800 hover:underline">Refresh license status</button>
-            <button type="button" onClick={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.assign('/login'); }} className="text-sm font-semibold text-slate-500 hover:text-slate-900">Sign out</button>
+            <button type="button" onClick={() => { logout(); navigate('/login'); }} className="text-sm font-semibold text-slate-500 hover:text-slate-900">Sign out</button>
           </div>
         </div>
       </section>

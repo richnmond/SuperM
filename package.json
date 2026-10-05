@@ -1,6 +1,6 @@
 {
   "name": "SuperM",
-  "version": "1.0.0",
+  "version": "1.10.0",
   "description": "SuperM retail management desktop app",
   "main": "electron/main.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "appId": "com.superm.desktop",
     "productName": "SuperM",
     "directories": {
-      "output": "dist"
+      "output": "dist-1.10.0-final"
     },
     "files": [
       "electron/**/*",
@@ -27,7 +27,13 @@
       {
         "from": "backend",
         "to": "backend",
-        "filter": ["**/*"]
+        "filter": [
+          "src/**/*",
+          "node_modules/**/*",
+          "uploads/**/*",
+          "package.json",
+          ".env"
+        ]
       },
       {
         "from": "frontend/build",
@@ -35,21 +41,30 @@
       }
     ],
     "win": {
-      "signAndEditExecutable": false,
+      "icon": "electron/icon.ico",
       "target": [
         {
           "target": "nsis",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         },
         {
           "target": "portable",
-          "arch": ["x64"]
+          "arch": [
+            "x64"
+          ]
         }
       ]
     },
     "nsis": {
       "oneClick": false,
+      "installerIcon": "electron/icon.ico",
+      "uninstallerIcon": "electron/icon.ico",
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.117.2"
   }
 }

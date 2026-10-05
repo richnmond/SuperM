@@ -13,6 +13,7 @@ const {
   createLicense,
   updateLicenseStatus,
   extendLicense,
+  setLicenseExpiry,
   changeLicensePlan
 } = require('../controllers/ownerController');
 const { ownerProtect } = require('../middleware/auth');
@@ -33,6 +34,7 @@ router.get('/licenses', listLicenses);
 router.post('/licenses', createLicense);
 router.patch('/licenses/:id/status', updateLicenseStatus);
 router.post('/licenses/:id/extend', extendLicense);
+router.patch('/licenses/:id/expiry', setLicenseExpiry);
 router.patch('/licenses/:id/plan', changeLicensePlan);
 
 module.exports = router;

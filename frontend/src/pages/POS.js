@@ -5,6 +5,8 @@ import { MagnifyingGlassIcon, XMarkIcon, ShoppingCartIcon, QrCodeIcon } from '@h
 import BarcodeScanner from '../components/BarcodeScanner';
 import ReceiptModal from '../components/ReceiptModal';
 import { API_BASE_URL } from '../config';
+import ProductImage from '../components/ProductImage';
+import { getProductImagePaths } from '../utils/productImages';
 
 const POS = () => {
   const getUnit = (product) => product.unit || 'Piece';
@@ -241,13 +243,12 @@ const POS = () => {
                     product.quantity <= 0 ? 'opacity-50 cursor-not-allowed bg-gray-100' : 'hover:border-primary-500'
                   }`}
                 >
-                  {product.image && (
-                    <img
-                      src={`${API_BASE_URL}${product.image}`}
-                      alt={product.name}
-                      className="w-full h-32 object-cover rounded-md mb-2"
-                    />
-                  )}
+                  <ProductImage
+                    src={getProductImagePaths(product)[0]}
+                    alt={product.name}
+                    containerClassName="mb-2 h-32 w-full rounded-md"
+                    imageClassName="h-full w-full object-cover"
+                  />
                   <h3 className="font-medium text-gray-900">{product.name}</h3>
                   <p className="text-sm text-gray-500">N{product.price.toFixed(2)} / {getUnit(product)}</p>
                   <p className="text-xs text-gray-400 mt-1">Stock: {product.quantity} {getUnit(product)}</p>

@@ -14,9 +14,9 @@ import {
 } from 'react-icons/fa';
 
 const productImages = [
-  '/landing-products/checkout.jpg',
-  '/landing-products/stock.jpg',
-  '/landing-products/margins.jpg',
+  'landing-products/checkout.jpg',
+  'landing-products/stock.jpg',
+  'landing-products/margins.jpg',
 ];
 
 const features = [

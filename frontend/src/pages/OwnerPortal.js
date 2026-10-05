@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import {
@@ -16,6 +17,13 @@ import {
 import { API_BASE_URL } from '../config';
 
 const OWNER_TOKEN_KEY = 'superm_owner_token';
+const minimumLicenseDays = 30;
+
+const getMinimumExpiryDate = (startDate) => {
+  const minimumDate = new Date(startDate);
+  minimumDate.setUTCDate(minimumDate.getUTCDate() + minimumLicenseDays);
+  return minimumDate.toISOString().slice(0, 10);
+};
 
 const OwnerPortal = () => {
   const [token, setToken] = useState(() => localStorage.getItem(OWNER_TOKEN_KEY));
@@ -197,6 +205,18 @@ const OwnerPortal = () => {
     }
   };
 
+  const setLicenseExpiry = async (event, license) => {
+    event.preventDefault();
+    const expiryDate = new FormData(event.currentTarget).get('expiryDate');
+    try {
+      await ownerRequest('patch', `/licenses/${license._id}/expiry`, { expiryDate });
+      toast.success('License expiry date updated');
+      await refresh();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not update expiry date');
+    }
+  };
+
   const changeLicensePlan = async (license, plan) => {
     try {
       await ownerRequest('patch', `/licenses/${license._id}/plan`, { plan });
@@ -266,7 +286,7 @@ const OwnerPortal = () => {
               <button disabled={submitting} className="mt-7 flex h-12 w-full items-center justify-center gap-2 bg-[#173d32] px-4 text-sm font-bold text-white hover:bg-[#225442] disabled:opacity-60">
                 {submitting ? 'Verifying access...' : 'Enter owner workspace'} {!submitting && <ArrowRightOnRectangleIcon className="h-4 w-4" />}
               </button>
-              <a href="/login" className="mt-6 block text-center text-sm font-semibold text-emerald-800 hover:underline">Return to business sign in</a>
+              <Link to="/login" className="mt-6 block text-center text-sm font-semibold text-emerald-800 hover:underline">Return to business sign in</Link>
             </form>
           </section>
         </div>
@@ -324,7 +344,7 @@ const OwnerPortal = () => {
             <label className="text-xs font-bold text-slate-600">Business<select required value={licenseBusinessId} onChange={(event) => setLicenseBusinessId(event.target.value)} className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900"><option value="">Choose unlicensed business</option>{allBusinesses.filter((business) => !business.license).map((business) => <option key={business._id} value={business._id}>{business.name}</option>)}</select></label>
             <label className="text-xs font-bold text-slate-600">Plan<select value={licensePlan} onChange={(event) => setLicensePlan(event.target.value)} className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900"><option value="starter">Starter</option><option value="professional">Professional</option><option value="enterprise">Enterprise</option></select></label>
             <label className="text-xs font-bold text-slate-600">Start date<input type="date" required value={licenseStartDate} onChange={(event) => setLicenseStartDate(event.target.value)} className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900" /></label>
-            <label className="text-xs font-bold text-slate-600">Expiry date<input type="date" required value={licenseExpiryDate} onChange={(event) => setLicenseExpiryDate(event.target.value)} className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900" /></label>
+            <label className="text-xs font-bold text-slate-600">Expiry date<input type="date" required min={getMinimumExpiryDate(licenseStartDate)} value={licenseExpiryDate} onChange={(event) => setLicenseExpiryDate(event.target.value)} className="mt-1 h-10 w-full border border-slate-300 bg-white px-3 text-sm font-normal text-slate-900" /></label>
             <button type="submit" disabled={!allBusinesses.some((business) => !business.license)} className="inline-flex h-10 items-center justify-center gap-2 bg-[#173d32] px-4 text-sm font-bold text-white hover:bg-[#225442] disabled:cursor-not-allowed disabled:opacity-50"><PlusIcon className="h-4 w-4" />Create license</button>
           </form>
           <div className="overflow-x-auto">
@@ -335,7 +355,7 @@ const OwnerPortal = () => {
                 <td className="px-3 py-3"><select aria-label={`Plan for ${license.business?.name || 'business'}`} value={license.plan} onChange={(event) => changeLicensePlan(license, event.target.value)} className="h-8 border border-slate-300 bg-white px-2 text-xs"><option value="starter">Starter</option><option value="professional">Professional</option><option value="enterprise">Enterprise</option></select></td>
                 <td className="px-3 py-3 text-xs text-slate-600">{new Date(license.startDate).toLocaleDateString()}</td><td className="px-3 py-3 text-xs text-slate-600">{new Date(license.expiryDate).toLocaleDateString()}</td>
                 <td className="px-3 py-3"><span className={`inline-flex px-2 py-1 text-[11px] font-bold ${license.effectiveStatus === 'active' ? 'bg-emerald-100 text-emerald-800' : license.effectiveStatus === 'suspended' ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'}`}>{license.effectiveStatus}</span></td>
-                <td className="px-5 py-3"><div className="flex flex-wrap items-center gap-3"><button type="button" onClick={() => setLicenseStatus(license)} className="text-xs font-bold text-emerald-800 hover:underline">{license.status === 'suspended' ? 'Reactivate' : 'Suspend'}</button><form onSubmit={(event) => extendLicense(event, license)} className="flex items-center gap-1"><input name="days" aria-label={`Days to extend ${license.business?.name || 'license'}`} type="number" min="1" max="3650" defaultValue="30" className="h-8 w-16 border border-slate-300 px-2 text-xs" /><button type="submit" className="text-xs font-bold text-slate-700 hover:underline">Extend days</button></form></div></td>
+                <td className="px-5 py-3"><div className="flex flex-wrap items-center gap-3"><button type="button" onClick={() => setLicenseStatus(license)} className="text-xs font-bold text-emerald-800 hover:underline">{license.status === 'suspended' ? 'Reactivate' : 'Suspend'}</button><form onSubmit={(event) => setLicenseExpiry(event, license)} className="flex items-center gap-1"><input name="expiryDate" aria-label={`Set expiry date for ${license.business?.name || 'license'}`} type="date" required min={getMinimumExpiryDate(license.startDate)} defaultValue={new Date(license.expiryDate).toISOString().slice(0, 10)} className="h-8 border border-slate-300 px-2 text-xs" /><button type="submit" className="text-xs font-bold text-slate-700 hover:underline">Set expiry</button></form><form onSubmit={(event) => extendLicense(event, license)} className="flex items-center gap-1"><input name="days" aria-label={`Days to extend ${license.business?.name || 'license'}`} type="number" min="1" max="3650" defaultValue="30" className="h-8 w-16 border border-slate-300 px-2 text-xs" /><button type="submit" className="text-xs font-bold text-slate-700 hover:underline">Extend days</button></form></div></td>
               </tr>)}{visibleLicenses.length === 0 && <tr><td colSpan="6" className="px-5 py-8 text-center text-sm text-slate-500">No licenses match this filter.</td></tr>}</tbody>
             </table>
           </div>

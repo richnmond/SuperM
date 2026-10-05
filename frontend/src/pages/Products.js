@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { EyeIcon, PencilIcon, TrashIcon, PlusIcon, PrinterIcon } from '@heroicons/react/24/outline';
+import { EyeIcon, PencilIcon, TrashIcon, PlusIcon, PrinterIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
 import { API_BASE_URL } from '../config';
 import BarcodeLabel from '../components/BarcodeLabel';
+import ProductImage from '../components/ProductImage';
+import { getProductImagePaths } from '../utils/productImages';
 
 const Products = () => {
   const units = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
@@ -25,7 +27,11 @@ const Products = () => {
     category: 'Groceries',
     barcode: '',
   });
-  const [image, setImage] = useState(null);
+  const [images, setImages] = useState([]);
+  const [retainedImages, setRetainedImages] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [valuation, setValuation] = useState({ products: [], totals: { totalCostValue: 0, totalSellingValue: 0, potentialProfit: 0 } });
@@ -87,7 +93,20 @@ const Products = () => {
   };
 
   const handleImageChange = (e) => {
-    setImage(e.target.files[0]);
+    const selectedImages = Array.from(e.target.files || []);
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (selectedImages.length > 8) {
+      toast.error('Choose up to 8 images at a time.');
+      e.target.value = '';
+      return;
+    }
+    const invalidImage = selectedImages.find((file) => !allowedTypes.includes(file.type) || file.size > 5 * 1024 * 1024);
+    if (invalidImage) {
+      toast.error(`${invalidImage.name}: use a JPEG, PNG, GIF, or WebP image under 5 MB.`);
+      e.target.value = '';
+      return;
+    }
+    setImages(selectedImages);
   };
 
   const generateBarcode = async () => {
@@ -105,6 +124,7 @@ const Products = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
     
     const formDataToSend = new FormData();
     Object.keys(formData).forEach((key) => {
@@ -126,16 +146,24 @@ const Products = () => {
     if (formData.reorderLevel !== '') {
       formDataToSend.append('lowStockThreshold', formData.reorderLevel);
     }
-    if (image) {
-      formDataToSend.append('image', image);
+    if (editingProduct) {
+      formDataToSend.append('retainedImages', JSON.stringify(retainedImages));
     }
+    images.forEach((file) => formDataToSend.append('images', file));
 
+    setIsSubmitting(true);
+    setUploadProgress(images.length > 0 ? 0 : null);
     try {
+      const requestConfig = images.length > 0 ? {
+        onUploadProgress: (event) => {
+          if (event.total) setUploadProgress(Math.round((event.loaded * 100) / event.total));
+        }
+      } : undefined;
       if (editingProduct) {
-        await axios.put(`${API_BASE_URL}/api/products/${editingProduct._id}`, formDataToSend);
+        await axios.put(`${API_BASE_URL}/api/products/${editingProduct._id}`, formDataToSend, requestConfig);
         toast.success('Product updated successfully');
       } else {
-        await axios.post(`${API_BASE_URL}/api/products`, formDataToSend);
+        await axios.post(`${API_BASE_URL}/api/products`, formDataToSend, requestConfig);
         toast.success('Product created successfully');
       }
       
@@ -144,7 +172,10 @@ const Products = () => {
       resetForm();
       fetchProducts();
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Operation failed');
+      toast.error(error.response?.data?.message || error.message || 'Product could not be saved. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+      setUploadProgress(null);
     }
   };
 
@@ -162,6 +193,8 @@ const Products = () => {
       category: product.category,
       barcode: product.barcode || ''
     });
+    setRetainedImages(getProductImagePaths(product));
+    setImages([]);
     setShowModal(true);
   };
 
@@ -179,6 +212,7 @@ const Products = () => {
 
   const handleViewDescription = (product) => {
     setSelectedProduct(product);
+    setActiveImageIndex(0);
     setShowDescriptionModal(true);
   };
 
@@ -248,7 +282,12 @@ const Products = () => {
       category: 'Groceries',
       barcode: ''
     });
-    setImage(null);
+    setImages([]);
+    setRetainedImages([]);
+  };
+
+  const removeRetainedImage = (imagePath) => {
+    setRetainedImages((currentImages) => currentImages.filter((image) => image !== imagePath));
   };
 
   const getProductProfit = (product) => {
@@ -268,6 +307,12 @@ const Products = () => {
     if (quantity <= threshold) return 'bg-red-50 text-red-700';
     return 'bg-primary-50 text-primary-700';
   };
+
+  const selectedProductImages = getProductImagePaths(selectedProduct);
+  const selectedStock = Number(selectedProduct?.stockQuantity ?? selectedProduct?.quantity ?? 0);
+  const selectedCost = Number(selectedProduct?.costPrice ?? 0);
+  const selectedPrice = Number(selectedProduct?.sellingPrice ?? selectedProduct?.price ?? 0);
+  const selectedUnit = selectedProduct?.unit || 'Piece';
 
   if (loading) {
     return (
@@ -329,11 +374,10 @@ const Products = () => {
         </div>
       </div>
 
-      <section className="space-y-4">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-900">Inventory valuation</h2>
+      <details className="overflow-hidden rounded-lg border border-gray-200 bg-white">
+        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-800">Inventory valuation</summary>
+        <section className="space-y-4 border-t border-gray-200 p-4">
           <p className="text-sm text-gray-500">Current stock value and potential margin. This is separate from actual profit.</p>
-        </div>
         <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
           <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Cost Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalCostValue)}</p></div>
           <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Selling Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalSellingValue)}</p></div>
@@ -345,7 +389,8 @@ const Products = () => {
             <tbody className="divide-y divide-gray-200">{valuation.products.map((product) => <tr key={product.productId}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-right">{product.availableStock} {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.costPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.sellingPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalCostValue)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalSellingValue)}</td><td className="px-4 py-3 text-right font-medium text-primary-700">{formatMoney(product.potentialProfit)}</td></tr>)}</tbody>
           </table>
         </div>
-      </section>
+        </section>
+      </details>
 
       {/* Products Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">
@@ -362,10 +407,7 @@ const Products = () => {
                 Selling Price
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Cost / Stock
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Profit / Reorder
+                Stock
               </th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
@@ -380,13 +422,12 @@ const Products = () => {
               <tr key={product._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    {product.image && (
-                      <img
-                        src={`${API_BASE_URL}${product.image}`}
-                        alt={product.name}
-                        className="h-10 w-10 rounded-full object-cover"
-                      />
-                    )}
+                    <ProductImage
+                      src={getProductImagePaths(product)[0]}
+                      alt={product.name}
+                      containerClassName="h-10 w-10 shrink-0 rounded-full"
+                      imageClassName="h-full w-full object-cover"
+                    />
                     <div className="ml-4">
                       <button
                         type="button"
@@ -395,9 +436,6 @@ const Products = () => {
                       >
                         {product.name}
                       </button>
-                      <div className="mt-1 text-sm text-gray-500">
-                        {product.description ? `${product.description.substring(0, 50)}${product.description.length > 50 ? '...' : ''}` : 'No description available'}
-                      </div>
                     </div>
                   </div>
                 </td>
@@ -405,15 +443,10 @@ const Products = () => {
                   {product.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                  ₦{Number(product.sellingPrice ?? product.price ?? 0).toFixed(2)}
+                  ₦{Number(product.sellingPrice ?? product.price ?? 0).toFixed(2)} / {product.unit || 'Piece'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div>Cost: ₦{Number(product.costPrice ?? 0).toFixed(2)}</div>
-                  <div>Stock: {Number(product.stockQuantity ?? product.quantity ?? 0)} {product.unit || 'Piece'}</div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <div>Profit: ₦{getProductProfit(product).toFixed(2)}</div>
-                  <div>Reorder: {Number(product.reorderLevel ?? product.lowStockThreshold ?? 0)}</div>
+                  {Number(product.stockQuantity ?? product.quantity ?? 0)} {product.unit || 'Piece'}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStockStatusColor(Number(product.stockQuantity ?? product.quantity ?? 0), Number(product.reorderLevel ?? product.lowStockThreshold ?? 0))}`}>
@@ -453,124 +486,105 @@ const Products = () => {
       </div>
       {/* Description Modal */}
       {showDescriptionModal && selectedProduct && (
-        <div className="fixed inset-0 z-20 overflow-y-auto">
-          <div className="flex min-h-screen items-center justify-center px-4 py-6 text-center sm:block sm:p-0">
-            <div
-              className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-              onClick={() => {
-                setShowDescriptionModal(false);
-                setSelectedProduct(null);
-              }}
-            ></div>
-            <span className="hidden sm:inline-block sm:h-screen sm:align-middle">&#8203;</span>
-            <div className="inline-block w-full max-w-lg transform overflow-hidden rounded-lg bg-white text-left align-middle shadow-xl transition-all sm:my-8">
-              <div className="bg-white px-4 pb-4 pt-5 sm:p-6">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 id="product-description-title" className="text-lg font-semibold text-gray-900">
-                      {selectedProduct.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-gray-500">Full product description</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowDescriptionModal(false);
-                      setSelectedProduct(null);
-                    }}
-                    className="rounded-md text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                    aria-label="Close product description"
-                  >
-                    <span className="text-2xl">×</span>
-                  </button>
+        <div className="fixed inset-0 z-20 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="product-details-title">
+          <div className="fixed inset-0 bg-gray-900/50" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}></div>
+          <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
+            <div className="relative my-8 w-full max-w-4xl overflow-hidden rounded-xl bg-white text-left shadow-2xl">
+              <div className="flex items-start justify-between border-b border-gray-200 px-6 py-5">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-gray-500">Product details</p>
+                  <h3 id="product-details-title" className="mt-1 text-xl font-semibold text-gray-900">{selectedProduct.name}</h3>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}
+                  className="rounded-md px-2 py-1 text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                  aria-label="Close product details"
+                >×</button>
+              </div>
 
-                <div className="mt-4 space-y-4">
-                  {selectedProduct.image ? (
-                    <img
-                      src={`${API_BASE_URL}${selectedProduct.image}`}
-                      alt={selectedProduct.name}
-                      className="h-48 w-full rounded-lg object-cover"
-                    />
-                  ) : (
-                    <div className="flex h-48 w-full items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 text-sm text-gray-500">
-                      No image available
+              <div className="grid gap-6 p-6 lg:grid-cols-2">
+                <div>
+                  <ProductImage
+                    src={selectedProductImages[Math.min(activeImageIndex, Math.max(selectedProductImages.length - 1, 0))]}
+                    alt={`${selectedProduct.name} ${activeImageIndex + 1}`}
+                    containerClassName="h-72 w-full rounded-lg bg-gray-50"
+                    imageClassName="h-full w-full object-contain"
+                  />
+                  {selectedProductImages.length > 1 && (
+                    <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+                      {selectedProductImages.map((imagePath, index) => (
+                        <button
+                          key={imagePath}
+                          type="button"
+                          onClick={() => setActiveImageIndex(index)}
+                          className={`shrink-0 overflow-hidden rounded-md border-2 ${activeImageIndex === index ? 'border-primary-600' : 'border-transparent'}`}
+                          aria-label={`View product image ${index + 1}`}
+                        >
+                          <ProductImage
+                            src={imagePath}
+                            alt={`${selectedProduct.name} thumbnail ${index + 1}`}
+                            containerClassName="h-16 w-16"
+                            imageClassName="h-full w-full object-cover"
+                          />
+                        </button>
+                      ))}
                     </div>
                   )}
+                </div>
 
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-sm font-semibold text-gray-900">Selling Price</p>
-                        <p className="text-xl font-bold text-primary-600">₦{Number(selectedProduct.sellingPrice ?? selectedProduct.price ?? 0).toFixed(2)}</p>
-                      </div>
-                      {selectedProduct.category && (
-                        <span className="inline-flex rounded-full bg-primary-100 px-3 py-1 text-sm font-medium text-primary-800">
-                          {selectedProduct.category}
-                        </span>
-                      )}
+                <div className="space-y-5">
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Selling price / {selectedUnit}</p>
+                      <p className="mt-1 text-2xl font-semibold text-gray-900">{formatMoney(selectedPrice)}</p>
                     </div>
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-sm text-gray-700">
-                      <div className="rounded-md bg-white p-2">
-                        <div className="text-gray-500">Cost Price</div>
-                        <div className="font-semibold">₦{Number(selectedProduct.costPrice ?? 0).toFixed(2)}</div>
-                      </div>
-                      <div className="rounded-md bg-white p-2">
-                        <div className="text-gray-500">Profit / Unit</div>
-                        <div className="font-semibold">₦{(Number(selectedProduct.sellingPrice ?? selectedProduct.price ?? 0) - Number(selectedProduct.costPrice ?? 0)).toFixed(2)}</div>
-                      </div>
-                      <div className="rounded-md bg-white p-2">
-                        <div className="text-gray-500">Stock Quantity</div>
-                        <div className="font-semibold">{Number(selectedProduct.stockQuantity ?? selectedProduct.quantity ?? 0)} {selectedProduct.unit || 'Piece'}</div>
-                      </div>
-                      <div className="rounded-md bg-white p-2">
-                        <div className="text-gray-500">Reorder Level</div>
-                        <div className="font-semibold">{Number(selectedProduct.reorderLevel ?? selectedProduct.lowStockThreshold ?? 0)}</div>
-                      </div>
-                    </div>
+                    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${getStockStatusColor(selectedStock, Number(selectedProduct.reorderLevel ?? selectedProduct.lowStockThreshold ?? 0))}`}>
+                      {getStockStatus(selectedStock, Number(selectedProduct.reorderLevel ?? selectedProduct.lowStockThreshold ?? 0))}
+                    </span>
                   </div>
 
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                    <p className="mb-2 text-sm font-semibold text-gray-900">Description</p>
-                    <p className="whitespace-pre-wrap break-words text-sm leading-6 text-gray-700">
-                      {selectedProduct.description || 'No description provided for this product.'}
-                    </p>
+                  <dl className="grid grid-cols-2 gap-x-5 gap-y-4 border-y border-gray-200 py-4 text-sm">
+                    <div><dt className="text-gray-500">Category</dt><dd className="mt-1 font-medium text-gray-900">{selectedProduct.category || '—'}</dd></div>
+                    <div><dt className="text-gray-500">Stock quantity</dt><dd className="mt-1 font-medium text-gray-900">{selectedStock} {selectedUnit}</dd></div>
+                    <div><dt className="text-gray-500">Cost price / {selectedUnit}</dt><dd className="mt-1 font-medium text-gray-900">{formatMoney(selectedCost)}</dd></div>
+                    <div><dt className="text-gray-500">Profit per {selectedUnit}</dt><dd className="mt-1 font-medium text-gray-900">{formatMoney(selectedPrice - selectedCost)}</dd></div>
+                    <div><dt className="text-gray-500">Reorder level</dt><dd className="mt-1 font-medium text-gray-900">{Number(selectedProduct.reorderLevel ?? selectedProduct.lowStockThreshold ?? 0)} {selectedUnit}</dd></div>
+                    <div><dt className="text-gray-500">Tax rate</dt><dd className="mt-1 font-medium text-gray-900">{Number(selectedProduct.taxRate || 0)}%</dd></div>
+                    <div><dt className="text-gray-500">Inventory value</dt><dd className="mt-1 font-medium text-gray-900">{formatMoney(selectedStock * selectedCost)}</dd></div>
+                    <div><dt className="text-gray-500">Potential profit</dt><dd className="mt-1 font-medium text-gray-900">{formatMoney(selectedStock * (selectedPrice - selectedCost))}</dd></div>
+                    <div><dt className="text-gray-500">Unit</dt><dd className="mt-1 font-medium text-gray-900">{selectedUnit}</dd></div>
+                    <div><dt className="text-gray-500">Barcode</dt><dd className="mt-1 break-all font-medium text-gray-900">{selectedProduct.barcode || '—'}</dd></div>
+                  </dl>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900">Description</h4>
+                    <p className="mt-1 whitespace-pre-wrap break-words text-sm leading-6 text-gray-600">{selectedProduct.description || 'No description provided.'}</p>
                   </div>
 
-                  {selectedProduct.barcode && (
-                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                      <div className="flex items-center justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">Barcode</p>
-                          <p className="font-mono text-sm text-gray-700">{selectedProduct.barcode}</p>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => handlePrintLabel(selectedProduct)}
-                          className="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
-                        >
-                          <PrinterIcon className="mr-2 h-4 w-4" />
-                          Print Label
-                        </button>
-                      </div>
-                      <div className="mt-4 print-label-preview">
-                        <BarcodeLabel product={selectedProduct} />
-                      </div>
+                  {(selectedProduct.createdAt || selectedProduct.updatedAt) && (
+                    <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-500">
+                      {selectedProduct.createdAt && <span>Created {new Date(selectedProduct.createdAt).toLocaleDateString()}</span>}
+                      {selectedProduct.updatedAt && <span>Updated {new Date(selectedProduct.updatedAt).toLocaleDateString()}</span>}
                     </div>
                   )}
                 </div>
               </div>
-              <div className="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDescriptionModal(false);
-                    setSelectedProduct(null);
-                  }}
-                  className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-base font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm"
-                >
-                  Close
-                </button>
+
+              {selectedProduct.barcode && (
+                <div className="border-t border-gray-200 px-6 py-4">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div><p className="text-xs font-semibold uppercase text-gray-500">Barcode</p><p className="mt-1 font-mono text-sm text-gray-800">{selectedProduct.barcode}</p></div>
+                    <button type="button" onClick={() => handlePrintLabel(selectedProduct)} className="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                      <PrinterIcon className="mr-2 h-4 w-4" />Print Label
+                    </button>
+                  </div>
+                  <div className="mt-4 print-label-preview"><BarcodeLabel product={selectedProduct} /></div>
+                </div>
+              )}
+
+              <div className="flex justify-end border-t border-gray-200 bg-gray-50 px-6 py-4">
+                <button type="button" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Close</button>
               </div>
             </div>
           </div>
@@ -749,26 +763,62 @@ const Products = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Product Image
+                        Product Images
                       </label>
+                      {editingProduct && (
+                        <div className="mb-3 flex flex-wrap gap-3">
+                          {retainedImages.length > 0 ? retainedImages.map((imagePath) => (
+                            <div key={imagePath} className="relative">
+                              <ProductImage
+                                src={imagePath}
+                                alt="Product gallery image"
+                                containerClassName="h-20 w-20 rounded-md border border-gray-200"
+                                imageClassName="h-full w-full object-cover"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => removeRetainedImage(imagePath)}
+                                className="absolute -right-2 -top-2 rounded-full bg-white p-1 text-red-600 shadow"
+                                aria-label="Remove product image"
+                              >
+                                <XMarkIcon className="h-4 w-4" />
+                              </button>
+                            </div>
+                          )) : <span className="text-xs text-gray-500">No saved product images.</span>}
+                        </div>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
+                        multiple
                         onChange={handleImageChange}
+                        disabled={isSubmitting}
                         className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                       />
+                      <p className="mt-1 text-xs text-gray-500">Select multiple images. New images are added to the product gallery.</p>
+                      {images.length > 0 && <p className="mt-1 text-xs text-gray-600">{images.length} image{images.length === 1 ? '' : 's'} selected.</p>}
+                      {uploadProgress !== null && (
+                        <div className="mt-3" role="status" aria-live="polite">
+                          <div className="mb-1 flex justify-between text-xs text-gray-600"><span>Uploading images</span><span>{uploadProgress}%</span></div>
+                          <div className="h-2 overflow-hidden rounded-full bg-gray-200">
+                            <div className="h-full bg-primary-600 transition-all" style={{ width: `${uploadProgress}%` }} />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
                 <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
                   <button
                     type="submit"
-                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    disabled={isSubmitting}
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-600 text-base font-medium text-white hover:bg-primary-700 disabled:cursor-wait disabled:opacity-60 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm"
                   >
-                    {editingProduct ? 'Update' : 'Create'}
+                    {isSubmitting ? (images.length > 0 ? `Uploading${uploadProgress === null ? '...' : ` ${uploadProgress}%`}` : 'Saving...') : (editingProduct ? 'Update' : 'Create')}
                   </button>
                   <button
                     type="button"
+                    disabled={isSubmitting}
                     onClick={() => {
                       setShowModal(false);
                       setEditingProduct(null);

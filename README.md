@@ -28,7 +28,7 @@ SuperM brings together the core workflows needed to run a modern retail business
 - Backend: Node.js, Express
 - Database: MongoDB
 - Authentication: JWT
-- File storage: Local uploads for product and profile images
+- Product image storage: Supabase Storage (legacy local product image URLs remain supported)
 
 ## Features
 
@@ -88,9 +88,12 @@ MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>
 JWT_SECRET=your_super_secret_key
 OWNER_EMAIL=owner@example.com
 OWNER_PASSWORD=use-a-long-unique-password
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your_backend_service_role_key
 ```
 
 > Replace the MongoDB connection string and JWT secret with your real credentials before starting the app. Set a unique owner email and strong password; the backend creates the owner account on first startup and stores the password as a bcrypt hash. Changing `OWNER_PASSWORD` does not reset an already-provisioned owner's password.
+> Product image uploads use the backend-only Supabase service role key. The backend creates a public `product-images` bucket on first upload when needed. Never add this key to frontend environment variables or client-side code.
 
 ## Production deployment
 
@@ -110,6 +113,12 @@ NODE_ENV=production npm start
 ```
 
 The backend serves the React production build from `frontend/build` and exposes the API at `/api/*`.
+
+### Personal desktop installer
+
+The current personal-use installer bundles the local backend and `backend/.env` so the installed app can connect to its configured MongoDB database, Supabase Storage, and license service. The environment file contains private credentials; use the installer only on a computer you control and never distribute it to customers. Customer distribution requires a separately hosted API and a build that excludes backend secrets.
+
+The installer version is read from the root `package.json`. Run `npm run dist` to build the Windows installer and portable app in `dist-1.10.0-final`.
 
 ## Project structure
 
