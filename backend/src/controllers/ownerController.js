@@ -4,7 +4,7 @@ const Business = require('../models/Business');
 const User = require('../models/User');
 const OwnerActivity = require('../models/OwnerActivity');
 const License = require('../models/License');
-const { importLegacyBusinesses } = require('../services/businessService');
+const { getBusinessKey, importLegacyBusinesses } = require('../services/businessService');
 const { generateLicenseKey, getLicenseStatus, importLegacyLicenses } = require('../services/licenseService');
 
 const licensePlans = ['starter', 'professional', 'enterprise'];
@@ -115,6 +115,32 @@ const updateBusinessStatus = async (req, res) => {
   }
 };
 
+const renameBusiness = async (req, res) => {
+  try {
+    const name = String(req.body.name || '').trim();
+    if (!name) return res.status(400).json({ message: 'Business name is required' });
+    const business = await Business.findById(req.params.id);
+    if (!business) return res.status(404).json({ message: 'Business not found' });
+
+    const key = getBusinessKey(name);
+    const existingBusiness = await Business.findOne({ key });
+    if (existingBusiness && String(existingBusiness._id) !== String(business._id)) {
+      return res.status(409).json({ message: 'That business name is already in use' });
+    }
+
+    const previousName = business.name;
+    business.name = name;
+    business.key = key;
+    await business.save();
+    await User.updateMany({ businessId: business._id }, { $set: { businessName: name } });
+    await recordOwnerActivity('business_renamed', `${previousName} was renamed to ${name}`, business._id);
+    res.json(business);
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).json({ message: 'That business name is already in use' });
+    res.status(400).json({ message: 'Could not rename business' });
+  }
+};
+
 const updateUserStatus = async (req, res) => {
   try {
     const { isActive } = req.body;
@@ -125,6 +151,34 @@ const updateUserStatus = async (req, res) => {
     res.json(user);
   } catch (error) {
     res.status(400).json({ message: 'Could not update user status' });
+  }
+};
+
+const moveUserToBusiness = async (req, res) => {
+  try {
+    const { businessId } = req.body;
+    if (!businessId) return res.status(400).json({ message: 'A destination business is required' });
+    const [user, business] = await Promise.all([
+      User.findById(req.params.userId),
+      Business.findById(businessId)
+    ]);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    if (!business) return res.status(404).json({ message: 'Destination business not found' });
+
+    if (String(user.businessId || '') !== String(business._id)) {
+      const previousBusiness = user.businessName || 'an unassigned business';
+      user.businessId = business._id;
+      user.businessName = business.name;
+      await user.save();
+      await recordOwnerActivity(
+        'user_business_changed',
+        `${user.email} was moved from ${previousBusiness} to ${business.name}`,
+        business._id
+      );
+    }
+    res.json({ _id: user._id, username: user.username, email: user.email, role: user.role, isActive: user.isActive, businessId: user.businessId, businessName: user.businessName });
+  } catch (error) {
+    res.status(400).json({ message: 'Could not change user business' });
   }
 };
 
@@ -285,4 +339,4 @@ const changeLicensePlan = async (req, res) => {
   }
 };
 
-module.exports = { login, getDashboard, listBusinesses, getBusiness, updateBusinessStatus, updateUserStatus, addBranch, removeBranch, getActivity, listLicenses, createLicense, updateLicenseStatus, extendLicense, setLicenseExpiry, changeLicensePlan };
+module.exports = { login, getDashboard, listBusinesses, getBusiness, updateBusinessStatus, renameBusiness, updateUserStatus, moveUserToBusiness, addBranch, removeBranch, getActivity, listLicenses, createLicense, updateLicenseStatus, extendLicense, setLicenseExpiry, changeLicensePlan };

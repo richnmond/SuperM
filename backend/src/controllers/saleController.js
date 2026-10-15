@@ -10,6 +10,14 @@ const PRODUCT_UNITS = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', '
 const createSale = async (req, res) => {
   try {
     const { items, paymentMethod, totalAmount, customerId } = req.body;
+    const idempotencyKey = req.get('Idempotency-Key');
+    if (!idempotencyKey || idempotencyKey.length > 128) {
+      return res.status(400).json({ message: 'A valid Idempotency-Key header is required' });
+    }
+
+    const existingSale = await Sale.findOne({ idempotencyKey, cashier: req.user._id });
+    if (existingSale) return res.json(existingSale);
+
     if (customerId) {
       const customer = await Customer.findById(customerId);
       if (!customer) {
@@ -64,7 +72,8 @@ const createSale = async (req, res) => {
       totalCost,
       paymentMethod,
       customerId: customerId || null,
-      cashier: req.user._id
+      cashier: req.user._id,
+      idempotencyKey
     });
 
     // Update product quantities
@@ -76,6 +85,13 @@ const createSale = async (req, res) => {
 
     res.status(201).json(sale);
   } catch (error) {
+    if (error.code === 11000 && req.get('Idempotency-Key')) {
+      const existingSale = await Sale.findOne({
+        idempotencyKey: req.get('Idempotency-Key'),
+        cashier: req.user._id
+      });
+      if (existingSale) return res.json(existingSale);
+    }
     res.status(500).json({ message: error.message });
   }
 };

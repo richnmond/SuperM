@@ -54,7 +54,6 @@ const Products = () => {
         setSelectedProduct(null);
       }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [showDescriptionModal]);

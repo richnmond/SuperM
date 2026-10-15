@@ -106,6 +106,9 @@ const updateProfile = async (req, res) => {
       businessName: user.businessName
     });
   } catch (error) {
+    if (error.code === 'BUSINESS_NAME_IN_USE' || error.code === 11000) {
+      return res.status(409).json({ message: 'That business name is already in use' });
+    }
     res.status(500).json({ message: error.message });
   }
 };

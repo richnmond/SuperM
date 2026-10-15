@@ -52,6 +52,12 @@ const saleSchema = new mongoose.Schema({
     required: true,
     index: true
   },
+  idempotencyKey: {
+    type: String,
+    unique: true,
+    sparse: true,
+    immutable: true
+  },
   items: [saleItemSchema],
   totalAmount: {
     type: Number,

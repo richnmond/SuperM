@@ -7,11 +7,26 @@ const getBusinessKey = (name) => name.trim().toLocaleLowerCase().replace(/\s+/g,
 const linkBusinessUser = async (user, name) => {
   const trimmedName = name.trim();
   const key = getBusinessKey(trimmedName);
-  const business = await Business.findOneAndUpdate(
-    { key },
-    { $setOnInsert: { key, name: trimmedName } },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  );
+  let business = user.businessId ? await Business.findById(user.businessId) : null;
+
+  if (business) {
+    const existingBusiness = await Business.findOne({ key });
+    if (existingBusiness && String(existingBusiness._id) !== String(business._id)) {
+      const error = new Error('That business name is already in use');
+      error.code = 'BUSINESS_NAME_IN_USE';
+      throw error;
+    }
+    business.name = trimmedName;
+    business.key = key;
+    await business.save();
+    await User.updateMany({ businessId: business._id }, { $set: { businessName: trimmedName } });
+  } else {
+    business = await Business.findOneAndUpdate(
+      { key },
+      { $setOnInsert: { key, name: trimmedName } },
+      { new: true, upsert: true, setDefaultsOnInsert: true }
+    );
+  }
 
   user.businessName = trimmedName;
   user.businessId = business._id;

@@ -50,7 +50,7 @@ SuperM brings together the core workflows needed to run a modern retail business
 ### Platform owner management
 - Sign in separately at `/owner` with the platform owner account
 - Review businesses, users, branches, license status, and system activity
-- Search and filter businesses, manage branches, and suspend or reactivate accounts
+- Search and filter businesses, rename them without changing their license record, move users between business records, manage branches, and suspend or reactivate accounts
 - Owner credentials are provisioned from backend environment variables; there is no public owner signup
 
 ### License management

@@ -67,7 +67,7 @@ function createWindow(port) {
   if (app.isPackaged) {
     mainWindow.loadFile(path.join(process.resourcesPath, 'frontend', 'build', 'index.html'));
   } else {
-    mainWindow.loadURL('http://localhost:5000');
+    mainWindow.loadURL(`http://127.0.0.1:${port}`);
   }
 
   mainWindow.on('closed', () => {

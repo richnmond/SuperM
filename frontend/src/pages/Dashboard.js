@@ -157,7 +157,7 @@ const Dashboard = () => {
               {user?.businessName || 'SuperM Store'}
             </h1>
             <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-300 sm:text-base">
-              Monitor sales, revenue, product coverage, and restocking signals from one focused retail command center.
+              Monitor sales, revenue, product coverage, and restocking signals from one focused business command center.
             </p>
 
             <div className="mt-6 grid max-w-3xl gap-3 sm:grid-cols-3">

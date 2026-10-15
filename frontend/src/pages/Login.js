@@ -3,20 +3,11 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   FaArrowRight,
-  FaChartLine,
-  FaCheckCircle,
   FaEnvelope,
   FaLock,
   FaShoppingCart,
-  FaStore,
   FaUser,
 } from 'react-icons/fa';
-
-const highlights = [
-  'Inventory, sales, customers, and expenses in one secure workspace.',
-  'Built for fast daily operations at the counter and back office.',
-  'Clear reporting so owners can act on stock and profit movement.',
-];
 
 const Login = () => {
   const { login, register, user } = useAuth();
@@ -55,65 +46,12 @@ const Login = () => {
   return (
     <div className="min-h-screen bg-slate-100 text-slate-950">
       <div className="grid min-h-screen lg:grid-cols-[1.02fr_0.98fr]">
-        <section className="relative hidden overflow-hidden bg-slate-950 px-10 py-10 text-white lg:flex lg:flex-col lg:justify-between xl:px-14">
-          <div className="absolute inset-0 bg-[linear-gradient(135deg,_rgba(5,150,105,0.38),_transparent_42%),radial-gradient(circle_at_82%_18%,_rgba(16,185,129,0.22),_transparent_30%),radial-gradient(circle_at_18%_80%,_rgba(6,95,70,0.18),_transparent_28%)]" />
-          <div className="relative z-10 flex items-center gap-3">
-            <span className="flex h-12 w-12 items-center justify-center rounded-lg bg-white text-xl text-primary-800 shadow-sm">
-              <FaShoppingCart />
-            </span>
-            <div>
-              <p className="text-xl font-black leading-5">SuperM</p>
-              <p className="text-sm text-primary-100/80">Retail control</p>
-            </div>
-          </div>
-
-          <div className="relative z-10 max-w-xl py-16">
-            <div className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold text-primary-100 shadow-sm backdrop-blur">
-              <FaStore />
-              Professional store management
-            </div>
-            <h1 className="mt-6 text-5xl font-black leading-tight xl:text-6xl">
-              Run the store with calmer, clearer numbers.
-            </h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-slate-300">
-              Sign in to manage products, checkout, suppliers, customers, expenses, and profit from a focused business dashboard.
-            </p>
-
-            <div className="mt-9 grid max-w-lg grid-cols-3 overflow-hidden rounded-lg border border-white/10 bg-white/[0.06] shadow-2xl shadow-black/20 backdrop-blur">
-              <div className="border-r border-white/10 p-5">
-                <p className="text-3xl font-black">24/7</p>
-                <p className="mt-1 text-sm text-slate-300">Access</p>
-              </div>
-              <div className="border-r border-white/10 p-5">
-                <p className="text-3xl font-black">Fast</p>
-                <p className="mt-1 text-sm text-slate-300">Checkout</p>
-              </div>
-              <div className="p-5">
-                <p className="text-3xl font-black">Live</p>
-                <p className="mt-1 text-sm text-slate-300">Reports</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 rounded-lg border border-white/10 bg-white/[0.07] p-5 backdrop-blur">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-300">Operations snapshot</p>
-                <p className="mt-1 text-2xl font-black">Today is ready</p>
-              </div>
-              <span className="flex h-11 w-11 items-center justify-center rounded-md bg-primary-400 text-slate-950">
-                <FaChartLine />
-              </span>
-            </div>
-            <div className="space-y-3">
-              {highlights.map((item) => (
-                <div key={item} className="flex items-start gap-3 text-sm leading-6 text-slate-200">
-                  <FaCheckCircle className="mt-1 shrink-0 text-primary-300" />
-                  <span>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
+        <section className="relative hidden min-h-screen overflow-hidden bg-emerald-950 lg:block">
+          <img
+            src={`${process.env.PUBLIC_URL}/login-business.png`}
+            alt="SuperM business management app in a supermarket"
+            className="absolute inset-0 h-full w-full object-fill"
+          />
         </section>
 
         <main className="flex min-h-screen items-center justify-center px-4 py-8 sm:px-6 lg:px-10">

@@ -42,6 +42,8 @@ const OwnerPortal = () => {
   const [licenseFilter, setLicenseFilter] = useState('all');
   const [branchName, setBranchName] = useState('');
   const [branchLocation, setBranchLocation] = useState('');
+  const [businessNameDraft, setBusinessNameDraft] = useState('');
+  const [userBusinessTargets, setUserBusinessTargets] = useState({});
   const [licenseBusinessId, setLicenseBusinessId] = useState('');
   const [licensePlan, setLicensePlan] = useState('starter');
   const [licenseStartDate, setLicenseStartDate] = useState(() => new Date().toISOString().slice(0, 10));
@@ -110,6 +112,10 @@ const OwnerPortal = () => {
     if (token) loadBusinesses();
   }, [token, search, statusFilter, licenseFilter]);
 
+  useEffect(() => {
+    setBusinessNameDraft(selected?.name || '');
+  }, [selected?._id, selected?.name]);
+
   const handleLogin = async (event) => {
     event.preventDefault();
     setSubmitting(true);
@@ -141,6 +147,18 @@ const OwnerPortal = () => {
     }
   };
 
+  const renameBusiness = async (event) => {
+    event.preventDefault();
+    if (!selected || !businessNameDraft.trim()) return;
+    try {
+      await ownerRequest('patch', `/businesses/${selected._id}/name`, { name: businessNameDraft.trim() });
+      toast.success('Business renamed');
+      await refresh();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not rename business');
+    }
+  };
+
   const changeUserStatus = async (user) => {
     try {
       await ownerRequest('patch', `/users/${user._id}/status`, { isActive: !user.isActive });
@@ -148,6 +166,18 @@ const OwnerPortal = () => {
       await refresh();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Could not update user');
+    }
+  };
+
+  const moveUserToBusiness = async (user) => {
+    const businessId = userBusinessTargets[user._id] || selected?._id;
+    if (!businessId) return;
+    try {
+      await ownerRequest('patch', `/users/${user._id}/business`, { businessId });
+      toast.success(`Moved ${user.email} to ${allBusinesses.find((business) => business._id === businessId)?.name || 'the selected business'}`);
+      await refresh();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Could not change user business');
     }
   };
 
@@ -393,9 +423,17 @@ const OwnerPortal = () => {
           <section className="min-w-0 border border-slate-200 bg-white">
             <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4"><div><h2 className="font-black">Business details</h2><p className="mt-1 text-xs text-slate-500">Users and branch overview</p></div>{selected && <button type="button" onClick={() => setSelected(null)} title="Close details" className="p-1 text-slate-500 hover:bg-slate-100"><XMarkIcon className="h-5 w-5" /></button>}</div>
             {selected ? <div className="max-h-[640px] space-y-5 overflow-y-auto p-5">
-              <div><p className="text-xs font-bold uppercase text-slate-500">Business</p><h3 className="mt-1 text-xl font-black">{selected.name}</h3><p className="mt-1 text-xs text-slate-500">License {selected.license?.effectiveStatus || 'not issued'}{selected.license?.expiryDate ? ` · expires ${new Date(selected.license.expiryDate).toLocaleDateString()}` : ''}</p></div>
+              <div><p className="text-xs font-bold uppercase text-slate-500">Business</p><h3 className="mt-1 text-xl font-black">{selected.name}</h3><p className="mt-1 text-xs text-slate-500">License {selected.license?.effectiveStatus || 'not issued'}{selected.license?.expiryDate ? ` · expires ${new Date(selected.license.expiryDate).toLocaleDateString()}` : ''}</p>
+                <form onSubmit={renameBusiness} className="mt-3 flex gap-2">
+                  <input aria-label="Business name" value={businessNameDraft} onChange={(event) => setBusinessNameDraft(event.target.value)} required className="h-9 min-w-0 flex-1 border border-slate-300 px-3 text-sm outline-none focus:border-emerald-700" />
+                  <button type="submit" disabled={!businessNameDraft.trim() || businessNameDraft.trim() === selected.name} className="h-9 bg-[#173d32] px-3 text-xs font-bold text-white hover:bg-[#225442] disabled:cursor-not-allowed disabled:opacity-50">Rename</button>
+                </form>
+              </div>
               <div><div className="mb-2 flex items-center justify-between"><h4 className="text-sm font-bold">Users</h4><span className="text-xs text-slate-500">{selected.users?.length || 0} accounts</span></div>
-                <div className="divide-y divide-slate-100 border-y border-slate-100">{selected.users?.map((user) => <div key={user._id} className="flex items-center justify-between gap-2 py-3"><div className="min-w-0"><p className="truncate text-sm font-semibold">{user.username}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.role}</p></div><button type="button" onClick={() => changeUserStatus(user)} className={`shrink-0 text-xs font-bold ${user.isActive ? 'text-rose-700' : 'text-emerald-800'} hover:underline`}>{user.isActive ? 'Suspend' : 'Reactivate'}</button></div>)}{!selected.users?.length && <p className="py-4 text-sm text-slate-500">No linked users.</p>}</div>
+                <div className="divide-y divide-slate-100 border-y border-slate-100">{selected.users?.map((user) => <div key={user._id} className="py-3">
+                  <div className="flex items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-semibold">{user.username}</p><p className="truncate text-xs text-slate-500">{user.email} · {user.role} · {user.isActive ? 'active' : 'inactive'}</p></div><button type="button" onClick={() => changeUserStatus(user)} className={`shrink-0 text-xs font-bold ${user.isActive ? 'text-rose-700' : 'text-emerald-800'} hover:underline`}>{user.isActive ? 'Suspend' : 'Reactivate'}</button></div>
+                  <div className="mt-2 flex gap-2"><select aria-label={`Move ${user.email} to business`} value={userBusinessTargets[user._id] || selected._id} onChange={(event) => setUserBusinessTargets((targets) => ({ ...targets, [user._id]: event.target.value }))} className="h-8 min-w-0 flex-1 border border-slate-300 bg-white px-2 text-xs">{allBusinesses.map((business) => <option key={business._id} value={business._id}>{business.name}{business.license ? ' · has license' : ' · no license'}</option>)}</select><button type="button" disabled={(userBusinessTargets[user._id] || selected._id) === selected._id} onClick={() => moveUserToBusiness(user)} className="h-8 shrink-0 border border-slate-300 px-2 text-xs font-bold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50">Move user</button></div>
+                </div>)}{!selected.users?.length && <p className="py-4 text-sm text-slate-500">No linked users.</p>}</div>
               </div>
               <div><div className="mb-2 flex items-center justify-between"><h4 className="text-sm font-bold">Branches</h4><span className="text-xs text-slate-500">{selected.branches?.length || 0} locations</span></div>
                 <div className="divide-y divide-slate-100 border-y border-slate-100">{selected.branches?.map((branch) => <div key={branch._id} className="flex items-center justify-between gap-3 py-3"><div><p className="text-sm font-semibold">{branch.name}</p><p className="text-xs text-slate-500">{branch.location || 'No location provided'}</p></div><button type="button" onClick={() => removeBranch(branch)} className="shrink-0 text-xs font-bold text-rose-700 hover:underline">Remove</button></div>)}{!selected.branches?.length && <p className="py-4 text-sm text-slate-500">No branches recorded.</p>}</div>

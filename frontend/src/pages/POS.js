@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import toast from 'react-hot-toast';
 import { MagnifyingGlassIcon, XMarkIcon, ShoppingCartIcon, QrCodeIcon } from '@heroicons/react/24/outline';
@@ -23,6 +23,9 @@ const POS = () => {
   const [showScanner, setShowScanner] = useState(false);
   const [receiptSale, setReceiptSale] = useState(null);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [isSubmittingSale, setIsSubmittingSale] = useState(false);
+  const checkoutInProgress = useRef(false);
+  const checkoutKey = useRef(null);
 
   const categories = [
     'All',
@@ -84,6 +87,7 @@ const POS = () => {
   };
 
   const addToCart = (product) => {
+    checkoutKey.current = null;
     if (product.quantity <= 0) {
       toast.error('Product out of stock');
       return;
@@ -129,6 +133,7 @@ const POS = () => {
   };
 
   const updateCartQuantity = (productId, newQuantity) => {
+    checkoutKey.current = null;
     const product = products.find((p) => p._id === productId);
 
     if (!product) {
@@ -155,23 +160,30 @@ const POS = () => {
   };
 
   const removeFromCart = (productId) => {
+    checkoutKey.current = null;
     setCart(cart.filter((item) => item.productId !== productId));
   };
 
   const calculateTotal = () => cart.reduce((sum, item) => sum + item.subtotal, 0);
 
   const handleCheckout = async () => {
+    if (checkoutInProgress.current) return;
     if (cart.length === 0) {
       toast.error('Cart is empty');
       return;
     }
 
+    checkoutInProgress.current = true;
+    setIsSubmittingSale(true);
+    checkoutKey.current = checkoutKey.current || window.crypto.randomUUID();
     try {
       const { data: sale } = await axios.post(`${API_BASE_URL}/api/sales`, {
         items: cart,
         totalAmount: calculateTotal(),
         paymentMethod,
         customerId: customerId || undefined
+      }, {
+        headers: { 'Idempotency-Key': checkoutKey.current }
       });
 
       toast.success('Sale completed successfully');
@@ -179,9 +191,13 @@ const POS = () => {
       setShowReceipt(true);
       setCart([]);
       setCustomerId('');
+      checkoutKey.current = null;
       fetchProducts();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Checkout failed');
+    } finally {
+      checkoutInProgress.current = false;
+      setIsSubmittingSale(false);
     }
   };
 
@@ -325,7 +341,10 @@ const POS = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Customer (optional)</label>
                 <select
                   value={customerId}
-                  onChange={(e) => setCustomerId(e.target.value)}
+                  onChange={(e) => {
+                    checkoutKey.current = null;
+                    setCustomerId(e.target.value);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="">Walk-in customer</option>
@@ -339,7 +358,10 @@ const POS = () => {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
                 <select
                   value={paymentMethod}
-                  onChange={(e) => setPaymentMethod(e.target.value)}
+                  onChange={(e) => {
+                    checkoutKey.current = null;
+                    setPaymentMethod(e.target.value);
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500"
                 >
                   <option value="cash">Cash</option>
@@ -350,10 +372,10 @@ const POS = () => {
 
               <button
                 onClick={handleCheckout}
-                disabled={cart.length === 0}
+                disabled={cart.length === 0 || isSubmittingSale}
                 className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Complete Sale
+                {isSubmittingSale ? 'Completing Sale...' : 'Complete Sale'}
               </button>
             </div>
           </div>

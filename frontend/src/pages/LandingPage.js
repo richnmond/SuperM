@@ -76,7 +76,7 @@ const LandingPage = () => {
           <div className="max-w-2xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-primary-200 bg-white px-3 py-2 text-sm font-semibold text-primary-800 shadow-sm">
               <FaShieldAlt />
-              Built for busy retail teams
+              Built for daily business operations
             </div>
             <h1 className="text-4xl font-black leading-[1.03] text-slate-950 sm:text-5xl lg:text-6xl">
               SuperM keeps your store organized from shelf to checkout.

@@ -5,7 +5,9 @@ const {
   listBusinesses,
   getBusiness,
   updateBusinessStatus,
+  renameBusiness,
   updateUserStatus,
+  moveUserToBusiness,
   addBranch,
   removeBranch,
   getActivity,
@@ -26,9 +28,11 @@ router.get('/dashboard', getDashboard);
 router.get('/businesses', listBusinesses);
 router.get('/businesses/:id', getBusiness);
 router.patch('/businesses/:id/status', updateBusinessStatus);
+router.patch('/businesses/:id/name', renameBusiness);
 router.post('/businesses/:id/branches', addBranch);
 router.delete('/businesses/:id/branches/:branchId', removeBranch);
 router.patch('/users/:userId/status', updateUserStatus);
+router.patch('/users/:userId/business', moveUserToBusiness);
 router.get('/activity', getActivity);
 router.get('/licenses', listLicenses);
 router.post('/licenses', createLicense);
