@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { EyeIcon, PencilIcon, TrashIcon, PlusIcon, PrinterIcon, XMarkIcon } from '@heroicons/react/24/outline';
@@ -12,6 +12,8 @@ const Products = () => {
   const units = ['Piece', 'Pack', 'Carton', 'Gram (g)', 'Kilogram (kg)', 'Millilitre (ml)', 'Litre (L)'];
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [productError, setProductError] = useState('');
+  const productRequestRef = useRef(null);
   const [showModal, setShowModal] = useState(false);
   const [showDescriptionModal, setShowDescriptionModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -42,9 +44,14 @@ const Products = () => {
   ];
 
   useEffect(() => {
-    fetchProducts();
     fetchValuation();
+    const timeoutId = setTimeout(() => fetchProducts(), searchTerm ? 300 : 0);
+    return () => clearTimeout(timeoutId);
   }, [searchTerm, categoryFilter]);
+
+  useEffect(() => () => {
+    productRequestRef.current?.abort();
+  }, []);
 
   useEffect(() => {
     if (!showDescriptionModal) return;
@@ -65,18 +72,32 @@ const Products = () => {
     };
   }, [showDescriptionModal]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (overrides = {}) => {
+    productRequestRef.current?.abort();
+    const controller = new AbortController();
+    productRequestRef.current = controller;
+    const nextSearch = overrides.search !== undefined ? overrides.search : searchTerm;
+    const nextCategory = overrides.category !== undefined ? overrides.category : categoryFilter;
+
+    setLoading(true);
+    setProductError('');
     try {
       const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (categoryFilter) params.append('category', categoryFilter);
+      if (nextSearch) params.append('search', nextSearch);
+      if (nextCategory) params.append('category', nextCategory);
 
-      const response = await axios.get(`${API_BASE_URL}/api/products?${params}`);
+      const response = await axios.get(`${API_BASE_URL}/api/products?${params}`, { signal: controller.signal });
       setProducts(response.data);
     } catch (error) {
-      toast.error('Failed to fetch products');
+      if (error.name === 'CanceledError' || axios.isCancel(error)) return;
+      const message = error.response?.data?.message || 'Failed to fetch products.';
+      setProductError(message);
+      toast.error(message);
     } finally {
-      setLoading(false);
+      if (productRequestRef.current === controller) {
+        productRequestRef.current = null;
+        setLoading(false);
+      }
     }
   };
 
@@ -175,8 +196,12 @@ const Products = () => {
       
       setShowModal(false);
       setEditingProduct(null);
+      const savedCategory = formData.category;
       resetForm();
-      fetchProducts();
+      setSearchTerm('');
+      setCategoryFilter(savedCategory);
+      fetchProducts({ search: '', category: savedCategory });
+      fetchValuation();
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || 'Product could not be saved. Please try again.');
     } finally {
@@ -210,6 +235,7 @@ const Products = () => {
         await axios.delete(`${API_BASE_URL}/api/products/${id}`);
         toast.success('Product deleted successfully');
         fetchProducts();
+        fetchValuation();
       } catch (error) {
         toast.error('Failed to delete product');
       }
@@ -320,14 +346,6 @@ const Products = () => {
   const selectedPrice = Number(selectedProduct?.sellingPrice ?? selectedProduct?.price ?? 0);
   const selectedUnit = selectedProduct?.unit || 'Piece';
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -424,7 +442,13 @@ const Products = () => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {products.map((product) => (
+            {loading ? (
+              <tr><td colSpan="6" className="px-6 py-12 text-center"><div className="flex flex-col items-center justify-center"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div><p className="mt-3 text-sm text-gray-500">Loading products...</p></div></td></tr>
+            ) : productError ? (
+              <tr><td colSpan="6" className="px-6 py-12 text-center"><p className="font-medium text-red-700">Unable to load products</p><p className="mt-1 text-sm text-gray-500">{productError}</p><button type="button" onClick={() => fetchProducts()} className="mt-4 rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Retry</button></td></tr>
+            ) : products.length === 0 ? (
+              <tr><td colSpan="6" className="px-6 py-12 text-center"><p className="font-medium text-gray-900">{searchTerm ? 'No products match your search.' : 'No products found in this category.'}</p><div className="mt-4 flex flex-wrap justify-center gap-3"><button type="button" onClick={() => { setEditingProduct(null); resetForm(); setShowModal(true); }} className="rounded-md bg-primary-600 px-4 py-2 text-sm font-medium text-white hover:bg-primary-700">Add Product</button>{(categoryFilter || searchTerm) && <button type="button" onClick={() => { setSearchTerm(''); setCategoryFilter(''); }} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">View All Products</button>}</div></td></tr>
+            ) : products.map((product) => (
               <tr key={product._id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">

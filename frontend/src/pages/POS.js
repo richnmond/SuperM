@@ -383,15 +383,7 @@ const POS = () => {
       </div>
 
       {showScanner && (
-        <div className="fixed z-10 inset-0 overflow-y-auto">
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
-            <div className="inline-block align-bottom sm:align-middle w-full">
-              <BarcodeScanner onProductFound={handleBarcodeScan} onClose={() => setShowScanner(false)} />
-            </div>
-          </div>
-        </div>
+        <BarcodeScanner onProductFound={handleBarcodeScan} onClose={() => setShowScanner(false)} />
       )}
 
       {showReceipt && receiptSale && (
