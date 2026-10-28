@@ -109,4 +109,27 @@ saleSchema.pre('validate', async function(next) {
   }
 });
 
+saleSchema.statics.ensureSaleIdSequence = async function () {
+  const saleCount = await this.countDocuments({});
+
+  if (saleCount === 0) {
+    await Counter.findOneAndUpdate(
+      { _id: 'saleId' },
+      { $set: { seq: 0 } },
+      { new: true, upsert: true }
+    );
+    return { action: 'reset', counter: 0, sales: 0 };
+  }
+
+  const highestSale = await this.findOne({}).sort({ saleId: -1 }).select('saleId').lean();
+  const highestSaleId = Number(highestSale?.saleId || 0);
+  const counter = await Counter.findOneAndUpdate(
+    { _id: 'saleId' },
+    { $max: { seq: highestSaleId } },
+    { new: true, upsert: true }
+  );
+
+  return { action: 'preserved', counter: Number(counter.seq), sales: saleCount, highestSaleId };
+};
+
 module.exports = mongoose.model('Sale', saleSchema);

@@ -18,6 +18,7 @@ const ownerRoutes = require('./routes/ownerRoutes');
 const licenseRoutes = require('./routes/licenseRoutes');
 const { protect, requireBusinessLicense } = require('./middleware/auth');
 const Owner = require('./models/Owner');
+const Sale = require('./models/Sale');
 const app = express();
 
 // Middleware
@@ -64,6 +65,8 @@ app.use((err, req, res, next) => {
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log('Connected to MongoDB');
+    const sequenceResult = await Sale.ensureSaleIdSequence();
+    console.log(`Sale ID sequence ${sequenceResult.action}: ${sequenceResult.counter}; ${sequenceResult.sales} existing sale(s)`);
     const ownerEmail = process.env.OWNER_EMAIL?.trim().toLowerCase();
     const ownerPassword = process.env.OWNER_PASSWORD;
     if (ownerEmail && ownerPassword) {
@@ -73,8 +76,15 @@ mongoose.connect(process.env.MONGODB_URI)
     } else {
       console.warn('Set OWNER_EMAIL and OWNER_PASSWORD to provision owner access');
     }
+
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
+    });
   })
-  .catch(err => console.error('MongoDB connection error:', err));
+  .catch(err => {
+    console.error('MongoDB connection error:', err);
+    process.exit(1);
+  });
 
 // Create uploads directory if it doesn't exist
 const fs = require('fs');
@@ -83,6 +93,3 @@ if (!fs.existsSync('uploads')) {
 }
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
