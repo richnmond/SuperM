@@ -10,7 +10,7 @@ const productSchema = new mongoose.Schema({
   },
   barcode: {
     type: String,
-    unique: true,
+    unique: true, 
     sparse: true, // Allows multiple null values
     trim: true
   },

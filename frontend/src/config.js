@@ -19,7 +19,7 @@ const getApiBaseUrl = () => {
     return 'http://localhost:5000';
   }
 
-  return window.location.origin;
+  return 'https://superm-59ak.onrender.com';
 };
 
 export const API_BASE_URL = getApiBaseUrl();

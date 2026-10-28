@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { EyeIcon, PencilIcon, TrashIcon, PlusIcon, PrinterIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import toast from 'react-hot-toast';
@@ -48,6 +49,9 @@ const Products = () => {
   useEffect(() => {
     if (!showDescriptionModal) return;
 
+    const previousBodyOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     const handleKeyDown = (event) => {
       if (event.key === 'Escape') {
         setShowDescriptionModal(false);
@@ -55,7 +59,10 @@ const Products = () => {
       }
     };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = previousBodyOverflow;
+    };
   }, [showDescriptionModal]);
 
   const fetchProducts = async () => {
@@ -485,29 +492,30 @@ const Products = () => {
       </div>
       {/* Description Modal */}
       {showDescriptionModal && selectedProduct && (
-        <div className="fixed inset-0 z-20 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="product-details-title">
-          <div className="fixed inset-0 bg-gray-900/50" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}></div>
-          <div className="flex min-h-full items-center justify-center p-4 sm:p-6">
-            <div className="relative my-8 w-full max-w-4xl overflow-hidden rounded-xl bg-white text-left shadow-2xl">
-              <div className="flex items-start justify-between border-b border-gray-200 px-6 py-5">
-                <div>
-                  <p className="text-xs font-semibold uppercase text-gray-500">Product details</p>
-                  <h3 id="product-details-title" className="mt-1 text-xl font-semibold text-gray-900">{selectedProduct.name}</h3>
+        createPortal(
+          <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="product-details-title">
+            <div className="fixed inset-0 bg-gray-900/50" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}></div>
+            <div className="flex min-h-full items-center justify-center p-3 sm:p-6">
+              <div className="relative my-auto max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl overflow-y-auto rounded-xl bg-white text-left shadow-2xl sm:max-h-[calc(100dvh-3rem)]">
+                <div className="sticky top-0 z-10 flex items-start justify-between border-b border-gray-200 bg-white px-4 py-4 sm:px-6 sm:py-5">
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-gray-500">Product details</p>
+                    <h3 id="product-details-title" className="mt-1 text-xl font-semibold text-gray-900">{selectedProduct.name}</h3>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}
+                    className="rounded-md px-2 py-1 text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+                    aria-label="Close product details"
+                  >×</button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }}
-                  className="rounded-md px-2 py-1 text-2xl leading-none text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-                  aria-label="Close product details"
-                >×</button>
-              </div>
 
-              <div className="grid gap-6 p-6 lg:grid-cols-2">
+                <div className="grid min-w-0 gap-5 p-4 sm:gap-6 sm:p-6 lg:grid-cols-2">
                 <div>
                   <ProductImage
                     src={selectedProductImages[Math.min(activeImageIndex, Math.max(selectedProductImages.length - 1, 0))]}
                     alt={`${selectedProduct.name} ${activeImageIndex + 1}`}
-                    containerClassName="h-72 w-full rounded-lg bg-gray-50"
+                    containerClassName="h-56 w-full rounded-lg bg-gray-50 sm:h-72"
                     imageClassName="h-full w-full object-contain"
                   />
                   {selectedProductImages.length > 1 && (
@@ -570,24 +578,26 @@ const Products = () => {
                 </div>
               </div>
 
-              {selectedProduct.barcode && (
-                <div className="border-t border-gray-200 px-6 py-4">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div><p className="text-xs font-semibold uppercase text-gray-500">Barcode</p><p className="mt-1 font-mono text-sm text-gray-800">{selectedProduct.barcode}</p></div>
-                    <button type="button" onClick={() => handlePrintLabel(selectedProduct)} className="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
-                      <PrinterIcon className="mr-2 h-4 w-4" />Print Label
-                    </button>
+                {selectedProduct.barcode && (
+                  <div className="border-t border-gray-200 px-4 py-4 sm:px-6">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div><p className="text-xs font-semibold uppercase text-gray-500">Barcode</p><p className="mt-1 font-mono text-sm text-gray-800">{selectedProduct.barcode}</p></div>
+                      <button type="button" onClick={() => handlePrintLabel(selectedProduct)} className="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+                        <PrinterIcon className="mr-2 h-4 w-4" />Print Label
+                      </button>
+                    </div>
+                    <div className="mt-4 print-label-preview"><BarcodeLabel product={selectedProduct} /></div>
                   </div>
-                  <div className="mt-4 print-label-preview"><BarcodeLabel product={selectedProduct} /></div>
-                </div>
-              )}
+                )}
 
-              <div className="flex justify-end border-t border-gray-200 bg-gray-50 px-6 py-4">
-                <button type="button" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Close</button>
+                <div className="sticky bottom-0 flex justify-end border-t border-gray-200 bg-gray-50 px-4 py-3 sm:px-6 sm:py-4">
+                  <button type="button" onClick={() => { setShowDescriptionModal(false); setSelectedProduct(null); }} className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Close</button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </div>,
+          document.body
+        )
       )}
 
       {/* Product Modal */}
@@ -838,5 +848,3 @@ const Products = () => {
 };
 
 export default Products;
-
-
