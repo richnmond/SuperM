@@ -14,6 +14,7 @@ import Customers from './pages/Customers';
 import Suppliers from './pages/Suppliers';
 import Expenses from './pages/Expenses';
 import Profit from './pages/Profit';
+import InventoryValuation from './pages/InventoryValuation';
 import Layout from './components/Layout';
 import OwnerPortal from './pages/OwnerPortal';
 import LicenseGate from './components/LicenseGate';
@@ -41,6 +42,7 @@ function App() {
               <Route path="customers" element={<Customers />} />
               <Route path="suppliers" element={<Suppliers />} />
               <Route path="expenses" element={<Expenses />} />
+              <Route path="inventory-valuation" element={<InventoryValuation />} />
               <Route path="profit" element={<Profit />} />
             </Route>
             <Route path="*" element={<Navigate to="/" />} />

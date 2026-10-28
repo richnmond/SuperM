@@ -14,6 +14,7 @@ import {
   FaMoon,
   FaSignOutAlt,
   FaShoppingCart,
+  FaWarehouse,
   FaBars,
   FaTimes
 } from 'react-icons/fa';
@@ -33,6 +34,7 @@ const navItems = [
   { to: '/app/customers', label: 'Customers', icon: FaUserFriends },
   { to: '/app/suppliers', label: 'Suppliers', icon: FaUsers },
   { to: '/app/expenses', label: 'Expenses', icon: FaReceipt },
+  { to: '/app/inventory-valuation', label: 'Inventory Valuation', icon: FaWarehouse },
   { to: '/app/profit', label: 'Profit', icon: FaDollarSign }
 ];
 

@@ -37,14 +37,12 @@ const Products = () => {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [valuation, setValuation] = useState({ products: [], totals: { totalCostValue: 0, totalSellingValue: 0, potentialProfit: 0 } });
 
   const categories = [
     'Groceries', 'Beverages', 'Snacks', 'Dairy', 'Meat', 'Produce', 'Household', 'Other'
   ];
 
   useEffect(() => {
-    fetchValuation();
     const timeoutId = setTimeout(() => fetchProducts(), searchTerm ? 300 : 0);
     return () => clearTimeout(timeoutId);
   }, [searchTerm, categoryFilter]);
@@ -101,14 +99,6 @@ const Products = () => {
     }
   };
 
-  const fetchValuation = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/products/valuation`);
-      setValuation(response.data);
-    } catch (error) {
-      toast.error('Failed to fetch inventory valuation');
-    }
-  };
 
   const formatMoney = (value) => `₦${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -201,7 +191,6 @@ const Products = () => {
       setSearchTerm('');
       setCategoryFilter(savedCategory);
       fetchProducts({ search: '', category: savedCategory });
-      fetchValuation();
     } catch (error) {
       toast.error(error.response?.data?.message || error.message || 'Product could not be saved. Please try again.');
     } finally {
@@ -235,7 +224,6 @@ const Products = () => {
         await axios.delete(`${API_BASE_URL}/api/products/${id}`);
         toast.success('Product deleted successfully');
         fetchProducts();
-        fetchValuation();
       } catch (error) {
         toast.error('Failed to delete product');
       }
@@ -397,24 +385,6 @@ const Products = () => {
           </div>
         </div>
       </div>
-
-      <details className="overflow-hidden rounded-lg border border-gray-200 bg-white">
-        <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-gray-800">Inventory valuation</summary>
-        <section className="space-y-4 border-t border-gray-200 p-4">
-          <p className="text-sm text-gray-500">Current stock value and potential margin. This is separate from actual profit.</p>
-        <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Cost Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalCostValue)}</p></div>
-          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Inventory Selling Value</p><p className="mt-2 text-2xl font-bold text-gray-900">{formatMoney(valuation.totals.totalSellingValue)}</p></div>
-          <div className="rounded-lg bg-white p-4 shadow"><p className="text-sm text-gray-500">Total Potential Profit</p><p className="mt-2 text-2xl font-bold text-primary-700">{formatMoney(valuation.totals.potentialProfit)}</p></div>
-        </div>
-        <div className="overflow-x-auto rounded-lg bg-white shadow">
-          <table className="min-w-full divide-y divide-gray-200 text-sm">
-            <thead className="bg-gray-50"><tr><th className="px-4 py-3 text-left">Product</th><th className="px-4 py-3 text-right">Available Stock</th><th className="px-4 py-3 text-right">Cost Price</th><th className="px-4 py-3 text-right">Selling Price</th><th className="px-4 py-3 text-right">Total Cost Value</th><th className="px-4 py-3 text-right">Total Selling Value</th><th className="px-4 py-3 text-right">Potential Profit</th></tr></thead>
-            <tbody className="divide-y divide-gray-200">{valuation.products.map((product) => <tr key={product.productId}><td className="px-4 py-3 font-medium">{product.name}</td><td className="px-4 py-3 text-right">{product.availableStock} {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.costPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.sellingPrice)} / {product.unit || 'Piece'}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalCostValue)}</td><td className="px-4 py-3 text-right">{formatMoney(product.totalSellingValue)}</td><td className="px-4 py-3 text-right font-medium text-primary-700">{formatMoney(product.potentialProfit)}</td></tr>)}</tbody>
-          </table>
-        </div>
-        </section>
-      </details>
 
       {/* Products Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden">

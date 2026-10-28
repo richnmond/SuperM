@@ -135,20 +135,29 @@ const getProductById = async (req, res) => {
 
 const getInventoryValuation = async (_req, res) => {
   try {
-    const products = await Product.find().select('name unit quantity stockQuantity costPrice sellingPrice price').sort({ name: 1 });
+    const products = await Product.find().select('name barcode category unit quantity stockQuantity reorderLevel lowStockThreshold costPrice sellingPrice price').sort({ name: 1 });
     const valuation = products.map((product) => {
-      const availableStock = Number(product.quantity ?? product.stockQuantity ?? 0);
-      const costPrice = Number(product.costPrice || 0);
+      const rawStock = product.stockQuantity ?? product.quantity ?? 0;
+      const availableStock = Number.isFinite(Number(rawStock)) ? Math.max(0, Number(rawStock)) : 0;
+      const rawCost = product.costPrice ?? 0;
+      const costPrice = Number.isFinite(Number(rawCost)) ? Math.max(0, Number(rawCost)) : 0;
       const sellingPrice = Number(product.sellingPrice ?? product.price ?? 0);
+      const reorderLevelValue = product.reorderLevel ?? product.lowStockThreshold ?? 20;
+      const reorderLevel = Number.isFinite(Number(reorderLevelValue)) ? Math.max(0, Number(reorderLevelValue)) : 20;
       const totalCostValue = availableStock * costPrice;
-      const totalSellingValue = availableStock * sellingPrice;
+      const totalSellingValue = availableStock * (Number.isFinite(sellingPrice) ? sellingPrice : 0);
+      const stockStatus = availableStock === 0 ? 'Out of Stock' : availableStock <= reorderLevel ? 'Low Stock' : 'In Stock';
       return {
         productId: product._id,
         name: product.name,
+        barcode: product.barcode || '',
+        category: product.category || 'Other',
         unit: product.unit || 'Piece',
         availableStock,
+        reorderLevel,
         costPrice,
         sellingPrice,
+        stockStatus,
         totalCostValue,
         totalSellingValue,
         potentialProfit: totalSellingValue - totalCostValue
